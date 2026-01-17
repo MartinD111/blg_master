@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BLG Operativa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="login-container">
+        <div class="glass-panel login-card">
+            <h1 class="login-title">BLG <span style="font-weight:700">OPERATIVA</span></h1>
+
+            <form action="{{ url_for('login') }}" method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="glass-input"
+                        style="width: 100%; box-sizing: border-box;" placeholder="Enter your ID">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="glass-input"
+                        style="width: 100%; box-sizing: border-box;" placeholder="Enter password">
+                </div>
+
+                <button type="submit" class="login-btn">LOGIN</button>
+            </form>
+
+            <div style="margin-top: 20px; opacity: 0.5; font-size: 0.8rem;">
+                <p>Protected System. Authorized Personnel Only.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

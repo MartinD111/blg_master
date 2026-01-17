@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                colors: { surface: { card: '#ffffff', cardDark: '#1c1c1e' } }
+            }
+        }
+    }
+</script>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
+
+    <!-- Header -->
+    <div class="mb-8 text-center md:text-left">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Toyota T2L Attached List Helper</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">Generate perfectly formatted T2L Excel lists from Toyota Stock
+            CSV.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left: Upload Form -->
+        <div class="lg:col-span-1 space-y-6">
+            <div
+                class="bg-white dark:bg-surface-cardDark rounded-3xl p-8 shadow-lg border border-gray-100 dark:border-gray-800">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                    <i data-lucide="file-spreadsheet" class="text-red-600"></i> New List
+                </h2>
+
+                <form id="t2lForm" class="space-y-4" hx-boost="false">
+                    <!-- CSV Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Toyota Stock
+                            CSV</label>
+                        <div class="relative group">
+                            <input type="file" id="csvFile" name="csv" accept=".csv"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+                            <div
+                                class="p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center gap-3 transition-colors group-hover:border-red-500">
+                                <i data-lucide="file-text" class="text-gray-400 group-hover:text-red-500"></i>
+                                <span id="csvName" class="text-sm text-gray-500 truncate">Choose CSV...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SWB Number -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SWB
+                            Number</label>
+                        <input type="text" name="swb"
+                            class="w-full bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 outline-none"
+                            placeholder="e.g. 003" required>
+                    </div>
+
+                    <!-- Chassis List -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chassis List
+                            (VINs)</label>
+                        <textarea name="chassis" rows="6"
+                            class="w-full bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-red-500 outline-none"
+                            placeholder="Paste VINs here (one per line)..." required></textarea>
+                    </div>
+
+                    <!-- DIZ Numbers -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">DIZ Numbers
+                            (Optional)</label>
+                        <textarea name="diz" rows="3"
+                            class="w-full bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-red-500 outline-none"
+                            placeholder="Paste DIZ numbers here..."></textarea>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="download"></i> Generate Excel
+                    </button>
+
+                    <div id="loading" class="hidden text-center text-sm text-red-600 font-medium animate-pulse">
+                        Processing data...</div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: Preview / Info -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-red-50 dark:bg-red-900/10 rounded-3xl p-8 border border-red-100 dark:border-red-900/20">
+                <h3 class="text-lg font-bold text-red-900 dark:text-red-100 mb-2">How it works</h3>
+                <ul class="space-y-2 text-red-800 dark:text-red-200 text-sm list-disc pl-5">
+                    <li>Upload the latest <strong>Toyota Stock CSV</strong> export.</li>
+                    <li>Paste the list of VINs you want to include in the T2L list.</li>
+                    <li>The tool will automatically find the chassis in the CSV, clean the data (destinations, default
+                        HS
+                        codes), and group them.</li>
+                    <li>It generates an Excel file with:
+                        <ul class="list-disc pl-5 mt-1 opacity-80">
+                            <li>All new vehicles list</li>
+                            <li>Separate sheets for each HS Code (default 'TOYOTA')</li>
+                            <li>Correct formatting for customs</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="successPanel"
+                class="hidden bg-green-50 dark:bg-green-900/10 rounded-3xl p-8 border border-green-100 dark:border-green-900/20 text-center animate-fade-in">
+                <div
+                    class="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                    <i data-lucide="check" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-green-900 dark:text-green-100 mb-2">Success!</h3>
+                <p class="text-green-700 dark:text-green-300 mb-6">Your T2L Excel file has been generated.</p>
+                <p class="text-xs text-gray-500">The download should have started automatically.</p>
+            </div>
+
+            <div id="errorPanel"
+                class="hidden bg-red-50 dark:bg-red-900/10 rounded-3xl p-8 border border-red-100 dark:border-red-900/20 text-center animate-fade-in">
+                <div
+                    class="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+                    <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-red-900 dark:text-red-100 mb-2">Error</h3>
+                <p id="errorMsg" class="text-red-700 dark:text-red-300 mb-6">-</p>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    document.getElementById('csvFile').addEventListener('change', (e) => {
+        if (e.target.files[0]) document.getElementById('csvName').textContent = e.target.files[0].name;
+    });
+
+    document.getElementById('t2lForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const loading = document.getElementById('loading');
+        const successPanel = document.getElementById('successPanel');
+        const errorPanel = document.getElementById('errorPanel');
+
+        loading.classList.remove('hidden');
+        successPanel.classList.add('hidden');
+        errorPanel.classList.add('hidden');
+
+        const formData = new FormData(e.target);
+
+        try {
+            const res = await fetch('/api/toyota/generate-t2l', { method: 'POST', body: formData });
+
+            if (res.ok) {
+                // Handle Blob Download
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "TOYOTA_ATT_LISTA.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                successPanel.classList.remove('hidden');
+            } else {
+                const data = await res.json();
+                throw new Error(data.error || "Unknown Error");
+            }
+
+        } catch (err) {
+            document.getElementById('errorMsg').textContent = err.message;
+            errorPanel.classList.remove('hidden');
+        } finally {
+            loading.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                colors: { toyota: { red: '#EB0A1E' } }
+            }
+        }
+    }
+</script>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
+
+    <!-- Header -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                <span class="w-3 h-8 bg-toyota-red rounded-full block"></span>
+                Toyota DVH Helper
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2 ml-6">Generate PL/CZ/UA Excel lists from Master Manifest
+                (Client-Side).</p>
+        </div>
+    </div>
+
+    <!-- Main Card -->
+    <div
+        class="bg-white dark:bg-[#1c1c1e] rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="space-y-6">
+                <!-- Input: Vessel -->
+                <div class="group">
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-5 mb-2 block tracking-wider">Vessel
+                        Name</label>
+                    <div class="relative">
+                        <input type="text" id="vesselName" list="vesselList" placeholder="NPIT, NPKF..."
+                            class="w-full bg-gray-50 dark:bg-black/20 border-none rounded-3xl py-4 px-6 text-lg font-bold focus:ring-2 focus:ring-toyota-red outline-none transition-colors">
+                        <i data-lucide="anchor"
+                            class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    </div>
+                    <datalist id="vesselList">
+                        <option value="NEPTUNE KEFALONIA">NPKF</option>
+                        <option value="NEPTUNE ILIAD">NPIL</option>
+                        <option value="NEPTUNE ITHAKI">NPIT</option>
+                        <option value="NEPTUNE KOPER">NPKP</option>
+                    </datalist>
+                </div>
+                <!-- Input: ETA -->
+                <div class="group">
+                    <label class="text-xs font-bold text-gray-500 uppercase ml-5 mb-2 block tracking-wider">ETA</label>
+                    <input type="date" id="eta"
+                        class="w-full bg-gray-50 dark:bg-black/20 border-none rounded-3xl py-4 px-6 text-lg font-bold focus:ring-2 focus:ring-toyota-red outline-none">
+                </div>
+            </div>
+
+            <!-- Drop Zones -->
+            <div class="space-y-4">
+                <!-- Master File -->
+                <div id="dropZoneMaster"
+                    class="relative group cursor-pointer h-24 flex items-center bg-gray-50 dark:bg-black/20 rounded-[2rem] border-2 border-transparent hover:border-blue-500/30 transition-all px-8">
+                    <input type="file" id="masterFile" accept=".xlsx, .xls" class="hidden">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-blue-500">
+                                <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold">Master File <span class="text-red-500">*</span></p>
+                                <p id="masterFileName" class="text-xs text-gray-500">Click or Drag</p>
+                            </div>
+                        </div>
+                        <i data-lucide="check-circle-2" id="masterCheck"
+                            class="w-6 h-6 text-green-500 opacity-0 transition-opacity"></i>
+                    </div>
+                </div>
+
+                <!-- UA File -->
+                <div id="dropZoneUA"
+                    class="relative group cursor-pointer h-24 flex items-center bg-gray-50 dark:bg-black/20 rounded-[2rem] border-2 border-transparent hover:border-yellow-500/30 transition-all px-8">
+                    <input type="file" id="uaFile" accept=".xlsx, .xls" class="hidden">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-yellow-500">
+                                <i data-lucide="file-plus" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold">UA File <span
+                                        class="text-xs font-normal text-gray-500">(Optional)</span></p>
+                                <p id="uaFileName" class="text-xs text-gray-500">Click or Drag</p>
+                            </div>
+                        </div>
+                        <i data-lucide="check-circle-2" id="uaCheck"
+                            class="w-6 h-6 text-green-500 opacity-0 transition-opacity"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="processFilesDVH()"
+            class="w-full bg-toyota-red hover:bg-red-700 text-white py-4 rounded-full font-bold text-lg shadow-lg shadow-red-500/30 transition-all flex items-center justify-center gap-2">
+            <i data-lucide="sparkles" class="w-5 h-5"></i> Process Files
+        </button>
+        <div id="dvhError" class="hidden mt-4 text-red-500 font-bold text-center"></div>
+
+        <!-- Export Area (Hidden initially) -->
+        <div id="exportContainer" class="hidden mt-8 space-y-6 animate-fade-in">
+            <!-- Results Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- PL Card -->
+                <div
+                    class="bg-gray-50 dark:bg-black/20 rounded-[2rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-blue-500"></div> PLWAW
+                        </h3>
+                        <button id="btnDownloadPL"
+                            class="p-2 bg-white dark:bg-white/10 rounded-full hover:bg-blue-100 hover:text-blue-600 transition-colors"><i
+                                data-lucide="download" class="w-5 h-5"></i></button>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Qty: <b id="valQtyPL" class="text-gray-900 dark:text-white">0</b></span>
+                        <span id="valWgtPL" class="font-mono">0 kg</span>
+                    </div>
+                </div>
+                <!-- CZ Card -->
+                <div
+                    class="bg-gray-50 dark:bg-black/20 rounded-[2rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div> CZPRG
+                        </h3>
+                        <button id="btnDownloadCZ"
+                            class="p-2 bg-white dark:bg-white/10 rounded-full hover:bg-green-100 hover:text-green-600 transition-colors"><i
+                                data-lucide="download" class="w-5 h-5"></i></button>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Qty: <b id="valQtyCZ" class="text-gray-900 dark:text-white">0</b></span>
+                        <span id="valWgtCZ" class="font-mono">0 kg</span>
+                    </div>
+                </div>
+                <!-- UA Card -->
+                <div
+                    class="bg-gray-50 dark:bg-black/20 rounded-[2rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div> UAIEV
+                        </h3>
+                        <button id="btnDownloadUA"
+                            class="p-2 bg-white dark:bg-white/10 rounded-full hover:bg-yellow-100 hover:text-yellow-600 transition-colors"><i
+                                data-lucide="download" class="w-5 h-5"></i></button>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Qty: <b id="valQtyUA" class="text-gray-900 dark:text-white">0</b></span>
+                        <span id="valWgtUA" class="font-mono">0 kg</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    // Setup Drag and Drop
+    setupDropZone('dropZoneMaster', 'masterFile', 'masterFileName', 'masterCheck');
+    setupDropZone('dropZoneUA', 'uaFile', 'uaFileName', 'uaCheck');
+
+    // Vessel Shortcuts
+    const vesselShortcuts = { "NPKF": "NEPTUNE KEFALONIA", "NPIL": "NEPTUNE ILIAD", "NPIT": "NEPTUNE ITHAKI", "NPKP": "NEPTUNE KOPER" };
+    document.getElementById('vesselName').addEventListener('blur', function () {
+        const v = this.value.toUpperCase();
+        if (vesselShortcuts[v]) this.value = vesselShortcuts[v];
+    });
+
+    async function processFilesDVH() {
+        const mFile = document.getElementById('masterFile').files[0];
+        const uFile = document.getElementById('uaFile').files[0];
+        const vessel = document.getElementById('vesselName').value;
+        const eta = document.getElementById('eta').value;
+
+        if (!mFile || !vessel) return alert("Please provide Vessel Name and Master File!");
+
+        document.getElementById('dvhError').classList.add('hidden');
+
+        try {
+            const rawM = await readFile(mFile);
+            let rawU = null;
+            if (uFile) rawU = await readFile(uFile);
+
+            let rPL = [], rCZ = [], rUA = [];
+
+            // Collect all rows
+            const allRows = [];
+            const sheetsM = Object.keys(rawM.Sheets);
+            sheetsM.forEach(sn => allRows.push(...XLSX.utils.sheet_to_json(rawM.Sheets[sn])));
+            if (rawU) Object.keys(rawU.Sheets).forEach(sn => allRows.push(...XLSX.utils.sheet_to_json(rawU.Sheets[sn])));
+
+            allRows.forEach(row => {
+                const mapped = mapRowDVH(row);
+                if (!mapped.vin) return;
+
+                // Destination Logic
+                let dest = mapped.dest || '';
+                if (dest === 'MZ') { mapped.dest = 'PLWAW'; rPL.push(mapped); return; }
+                if (dest === 'KL') { mapped.dest = 'CZPRG'; rCZ.push(mapped); return; }
+                if (dest.includes('UAIEV') || dest.includes('UA')) { mapped.dest = 'UAIEV'; rUA.push(mapped); return; }
+                if (dest.includes('PL')) { mapped.dest = 'PLWAW'; rPL.push(mapped); return; }
+                if (dest.includes('CZ') || dest.includes('AT')) { mapped.dest = 'CZPRG'; rCZ.push(mapped); return; }
+            });
+
+            // Format Output
+            const fmtDate = eta ? eta.split('-').reverse().join('.') : '';
+            const build = (r, type) => ({
+                "NO.": 1, "VIN": r.vin, "VESSEL": vessel, "DESTINATION": r.dest, "VCP": r.vcp, "MODEL": r.model,
+                "WEIGHT": r.wgt, "MOT": r.mot, "LF": r.lf, "DATE": fmtDate, "MRN": "", "DIZ": "", "DAMAGE": ""
+            });
+
+            dvhData = {
+                PL: rPL.map(x => build(x)),
+                CZ: rCZ.map(x => build(x)),
+                UA: rUA.map(x => { let b = build(x); b.VALUE = ""; b.TARIFF = x.tariff; return b; }),
+                meta: { vessel, eta }
+            };
+
+            // Update UI
+            updateCard('PL', dvhData.PL);
+            updateCard('CZ', dvhData.CZ);
+            updateCard('UA', dvhData.UA);
+
+            document.getElementById('exportContainer').classList.remove('hidden');
+
+            // Setup Downloads
+            setupDL('btnDownloadPL', 'PL', dvhData.PL);
+            setupDL('btnDownloadCZ', 'CZ', dvhData.CZ);
+            setupDL('btnDownloadUA', 'UA', dvhData.UA);
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('dvhError').innerText = "Error: " + err.message;
+            document.getElementById('dvhError').classList.remove('hidden');
+        }
+    }
+
+    function mapRowDVH(row, destOvr) {
+        const k = (s) => Object.keys(row).find(x => x.toUpperCase().includes(s));
+        return {
+            vin: row[k('VIN')] || row[k('PVVIN')],
+            dest: destOvr || row[k('DEST')] || row[k('PVDEST')],
+            model: row[k('MODEL')] || row[k('PVMODN')],
+            wgt: row[k('WEIGHT')] || row[k('PVWGHT')],
+            vcp: row[k('VCP')],
+            mot: row[k('MOT')],
+            lf: row[k('LF')],
+            tariff: row[k('TARIFF')] || row[k('PVTRCD')]
+        };
+    }
+
+    function updateCard(type, data) {
+        document.getElementById(`valQty${type}`).innerText = data.length;
+        const w = data.reduce((a, b) => a + (parseFloat(b.WEIGHT) || 0), 0);
+        document.getElementById(`valWgt${type}`).innerText = w.toLocaleString() + ' kg';
+    }
+
+    function setupDL(btnId, type, data) {
+        const btn = document.getElementById(btnId);
+        btn.onclick = () => {
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            const fn = `${dvhData.meta.eta.replace(/-/g, '')} - ${dvhData.meta.vessel} - ${type}.xlsx`;
+            XLSX.writeFile(wb, fn);
+        };
+    }
+
+    function setupDropZone(zId, iId, nId, cId) {
+        const z = document.getElementById(zId);
+        const i = document.getElementById(iId);
+        const n = document.getElementById(nId);
+        const c = cId ? document.getElementById(cId) : null;
+
+        z.addEventListener('click', () => i.click());
+        z.addEventListener('dragover', (e) => { e.preventDefault(); z.classList.add('border-blue-500'); });
+        z.addEventListener('dragleave', () => { z.classList.remove('border-blue-500'); });
+        z.addEventListener('drop', (e) => {
+            e.preventDefault(); z.classList.remove('border-blue-500');
+            if (e.dataTransfer.files[0]) { i.files = e.dataTransfer.files; n.innerText = i.files[0].name; if (c) c.style.opacity = 1; }
+        });
+        i.addEventListener('change', () => { if (i.files[0]) { n.innerText = i.files[0].name; if (c) c.style.opacity = 1; } });
+    }
+
+    function readFile(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }));
+            reader.readAsArrayBuffer(file);
+        });
+    }
+</script>
+{% endblock %}

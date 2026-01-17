@@ -1,0 +1,5 @@
+<!-- This file mimics the structure of base.html but without the surrounding <html>, <head>, and <nav> tags. 
+     It is used when `spa_mode` is True, effectively rendering only the content. -->
+<div class="main-content" id="main-content-swapped">
+    {% block content %}{% endblock %}
+</div>

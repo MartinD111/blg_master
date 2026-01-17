@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content-grid">
+    <div class="card glass-panel">
+        <div class="card-header">
+            System Stock
+        </div>
+        <div class="card-body">
+            <h2>12,450</h2>
+        </div>
+    </div>
+
+    <div class="card glass-panel">
+        <div class="card-header">
+            Dispatched Today
+        </div>
+        <div class="card-body">
+            <h2 class="text-glow">840</h2>
+        </div>
+    </div>
+
+    <div class="card glass-panel">
+        <div class="card-header">
+            Loading Plan (Wagons)
+        </div>
+        <div class="card-body">
+            <h2 class="text-glow">45 / 50</h2>
+        </div>
+    </div>
+
+    <div class="card glass-panel">
+        <div class="card-header">
+            Pending Customs
+        </div>
+        <div class="card-body">
+            <h2 class="text-glow" style="color: #ffcc00;">12</h2>
+        </div>
+    </div>
+</div>
+
+<div class="glass-panel" style="margin-top: 20px; padding: 20px; min-height: 400px;">
+    <div class="card-header">Daily Activity Flow</div>
+    <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; opacity: 0.5;">
+        <!-- Placeholder for chart -->
+        <i class="fas fa-chart-area" style="font-size: 5rem;"></i>
+        <span style="margin-left: 10px;">Chart Visualization Placeholder</span>
+    </div>
+</div>
+{% endblock %}

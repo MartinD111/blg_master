@@ -1,0 +1,630 @@
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+
+:root {
+    /* ONE UI 8.5 VARIABLES */
+    --glass-bg: rgba(20, 20, 35, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --glass-blur: blur(30px);
+
+    --dropdown-bg: rgba(30, 30, 50, 0.90);
+
+    --text-main: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.75);
+
+    --accent-glow: rgba(100, 149, 237, 0.4);
+    --accent-color: #6c5ce7;
+    /* Violet/Blue accent */
+
+    --bg-dark: #0f0f18;
+    --header-height: 60px;
+    /* Slightly taller for pill/floating feel */
+
+    --glass-input-bg: rgba(255, 255, 255, 0.08);
+    --glass-input-border: rgba(255, 255, 255, 0.15);
+
+    --radius-pill: 50px;
+    --radius-card: 28px;
+}
+
+/* Light Mode Overrides */
+html:not(.dark) {
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-shadow: 0 4px 25px rgba(176, 196, 222, 0.3);
+
+    --dropdown-bg: rgba(245, 248, 255, 0.95);
+
+    --text-main: #1a2a44;
+    --text-muted: #576d8a;
+
+    --bg-dark: #e8f0fe;
+    /* Very light blue tint base */
+
+    --accent-color: #4a90e2;
+
+    --glass-input-bg: rgba(255, 255, 255, 0.6);
+    --glass-input-border: rgba(255, 255, 255, 0.8);
+}
+
+/* Dark Mode Overrides (Explicit) */
+html.dark {
+    --glass-bg: rgba(30, 35, 45, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --dropdown-bg: rgba(40, 44, 52, 0.98);
+    --text-main: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.85);
+    --bg-dark: #121212;
+    --accent-color: #4a90e2;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-dark);
+    /* Dark Mode Deep Gradient */
+    background-image: radial-gradient(circle at 10% 10%, rgba(88, 54, 187, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 90% 90%, rgba(30, 40, 100, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(20, 20, 30, 1) 0%, rgba(10, 10, 20, 1) 100%);
+    background-attachment: fixed;
+    color: var(--text-main);
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Adjust gradients for light mode */
+html:not(.dark) body {
+    /* Light Mode Blue Gradient */
+    background-image: linear-gradient(135deg, #e0efff 0%, #f0f7ff 100%);
+    background-attachment: fixed;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(100, 100, 100, 0.2);
+    border-radius: 3px;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 100, 100, 0.4);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Glass Basics */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--radius-card);
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Header */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    background: transparent;
+    /* Use var! */
+    /* Floating Header Look */
+    margin: 10px 20px 0 20px;
+    width: auto;
+    border-radius: var(--radius-pill);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
+    transition: background 0.3s, border-color 0.3s;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    color: var(--text-main);
+    margin-right: 40px;
+    text-decoration: none;
+    /* For link */
+}
+
+.header-center {
+    flex-grow: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Navigation - Modern Dropdowns */
+.nav-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    align-items: center;
+}
+
+.nav-item {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.nav-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.nav-item:hover {
+    background: rgba(125, 125, 125, 0.1);
+}
+
+.nav-item:hover .nav-link {
+    color: var(--text-main);
+}
+
+/* Dropdown Menu (Level 2) */
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 15px);
+    /* Push it down below the header */
+    left: 0;
+    min-width: 240px;
+    background: var(--dropdown-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    /* Pill-like */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    padding: 12px;
+    list-style: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* Bouncy entry */
+    z-index: 1001;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* Arrow/Bridge to prevent closing when hovering gap */
+.nav-item::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 20px;
+}
+
+/* Show dropdown on hover */
+.nav-item:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    position: relative;
+}
+
+.dropdown-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+}
+
+.dropdown-item:hover>.dropdown-link {
+    background: var(--glass-input-bg);
+    color: var(--text-main);
+    transform: translateX(5px);
+}
+
+/* Flyout Menu (Level 3) */
+.flyout-menu {
+    position: absolute;
+    top: -10px;
+    left: 100%;
+    min-width: 220px;
+    margin-left: 15px;
+    background: var(--dropdown-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 12px;
+    list-style: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-10px);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    z-index: 1002;
+    backdrop-filter: blur(20px);
+}
+
+/* Bridge for Flyout */
+.dropdown-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -15px;
+    /* Cover margin gap */
+    width: 15px;
+    height: 100%;
+}
+
+/* Show flyout on hover of parent item */
+.dropdown-item:hover>.flyout-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+/* Arrow indicator for items with submenus */
+.has-children>a::after {
+    content: '\f105';
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    margin-left: 10px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* Search */
+.search-container {
+    position: relative;
+}
+
+.glass-input {
+    background: var(--glass-input-bg);
+    border: 1px solid var(--glass-input-border);
+    border-radius: 50px;
+    padding: 8px 15px 8px 35px;
+    color: var(--text-main);
+    outline: none;
+    width: 200px;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+
+.glass-input:focus {
+    background: rgba(125, 125, 125, 0.2);
+    border-color: var(--accent-color);
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.7;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* User Profile */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px 15px;
+    border-radius: 50px;
+    transition: background 0.2s;
+    color: var(--text-main);
+}
+
+.user-profile:hover {
+    background: rgba(125, 125, 125, 0.1);
+}
+
+.avatar-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: white;
+}
+
+/* Main Content */
+.main-content {
+    padding: 30px;
+    max-width: 1920px;
+    margin: 0 auto;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-body {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.card-body h2 {
+    font-size: 2rem;
+    margin: 0;
+    color: var(--text-main);
+}
+
+/* Login Page Specifics */
+.login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #1a2a3a 0%, #0a0a0a 100%);
+}
+
+.login-card {
+    width: 400px;
+    padding: 40px;
+    text-align: center;
+}
+
+.login-title {
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+    font-weight: 300;
+    letter-spacing: 2px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent-color);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+.login-btn:hover {
+    background: #357abd;
+}
+
+/* Settings & Profile Styles (Moved from inline) */
+.settings-btn {
+    background: var(--glass-input-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.settings-btn:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.avatar-option {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(125, 125, 125, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+html.dark .avatar-option {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.avatar-option:hover {
+    transform: scale(1.1);
+    background: var(--accent-color);
+    color: white;
+}
+
+#big-avatar:hover .avatar-overlay {
+    opacity: 1;
+}
+
+.active-profile {
+    border-bottom: 2px solid var(--accent-color);
+}/ *   N a v i g a t i o n   I m p r o v e m e n t s   * /  
+ . n a v - i t e m   {  
+         p o s i t i o n :   r e l a t i v e ;  
+         h e i g h t :   1 0 0 % ;  
+         d i s p l a y :   f l e x ;  
+         a l i g n - i t e m s :   c e n t e r ;  
+ }  
+  
+ / *   C e n t e r   D r o p d o w n s   * /  
+ . d r o p d o w n - m e n u   {  
+         p o s i t i o n :   a b s o l u t e ;  
+         t o p :   1 0 0 % ;  
+         l e f t :   5 0 % ;  
+         t r a n s f o r m :   t r a n s l a t e X ( - 5 0 % )   t r a n s l a t e Y ( 1 0 p x ) ;  
+         b a c k g r o u n d :   r g b a ( 1 8 ,   1 8 ,   1 8 ,   0 . 9 5 ) ;  
+         b a c k d r o p - f i l t e r :   b l u r ( 1 2 p x ) ;  
+         b o r d e r :   1 p x   s o l i d   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 1 ) ;  
+         b o r d e r - r a d i u s :   1 r e m ;  
+         p a d d i n g :   0 . 5 r e m ;  
+         m i n - w i d t h :   2 2 0 p x ;  
+         o p a c i t y :   0 ;  
+         v i s i b i l i t y :   h i d d e n ;  
+         t r a n s i t i o n :   a l l   0 . 2 s   c u b i c - b e z i e r ( 0 . 1 6 ,   1 ,   0 . 3 ,   1 ) ;  
+         b o x - s h a d o w :   0   1 0 p x   4 0 p x   - 1 0 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 5 ) ;  
+         z - i n d e x :   5 0 ;  
+ }  
+  
+ . n a v - i t e m : h o v e r   . d r o p d o w n - m e n u   {  
+         o p a c i t y :   1 ;  
+         v i s i b i l i t y :   v i s i b l e ;  
+         t r a n s f o r m :   t r a n s l a t e X ( - 5 0 % )   t r a n s l a t e Y ( 0 ) ;  
+ }  
+  
+ / *   S t y l i n g   I t e m s   * /  
+ . d r o p d o w n - i t e m   {  
+         l i s t - s t y l e :   n o n e ;  
+         p o s i t i o n :   r e l a t i v e ;  
+         / *   C o n t e x t   f o r   n e s t e d   * /  
+ }  
+  
+ . d r o p d o w n - l i n k   {  
+         d i s p l a y :   f l e x ;  
+         a l i g n - i t e m s :   c e n t e r ;  
+         g a p :   1 0 p x ;  
+         p a d d i n g :   0 . 7 5 r e m   1 r e m ;  
+         c o l o r :   # e 5 e 5 e 5 ;  
+         t e x t - d e c o r a t i o n :   n o n e ;  
+         f o n t - s i z e :   0 . 9 r e m ;  
+         f o n t - w e i g h t :   5 0 0 ;  
+         b o r d e r - r a d i u s :   0 . 7 5 r e m ;  
+         t r a n s i t i o n :   b a c k g r o u n d   0 . 1 5 s   e a s e ;  
+ }  
+  
+ . d r o p d o w n - l i n k : h o v e r   {  
+         b a c k g r o u n d :   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 1 ) ;  
+         c o l o r :   w h i t e ;  
+ }  
+  
+ . d r o p d o w n - l i n k   i   {  
+         w i d t h :   2 0 p x ;  
+         t e x t - a l i g n :   c e n t e r ;  
+         o p a c i t y :   0 . 7 ;  
+ }  
+  
+ / *   N e s t e d   D r o p d o w n s   ( F l y o u t   R i g h t )   * /  
+ . d r o p d o w n - s u b m e n u   {  
+         p o s i t i o n :   a b s o l u t e ;  
+         t o p :   0 ;  
+         l e f t :   1 0 0 % ;  
+         m a r g i n - l e f t :   8 p x ;  
+         / *   G a p   * /  
+         b a c k g r o u n d :   r g b a ( 1 8 ,   1 8 ,   1 8 ,   0 . 9 5 ) ;  
+         b a c k d r o p - f i l t e r :   b l u r ( 1 2 p x ) ;  
+         b o r d e r :   1 p x   s o l i d   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 1 ) ;  
+         b o r d e r - r a d i u s :   1 r e m ;  
+         p a d d i n g :   0 . 5 r e m ;  
+         m i n - w i d t h :   2 0 0 p x ;  
+         o p a c i t y :   0 ;  
+         v i s i b i l i t y :   h i d d e n ;  
+         t r a n s f o r m :   t r a n s l a t e X ( - 1 0 p x ) ;  
+         t r a n s i t i o n :   a l l   0 . 2 s   c u b i c - b e z i e r ( 0 . 1 6 ,   1 ,   0 . 3 ,   1 ) ;  
+         b o x - s h a d o w :   0   1 0 p x   4 0 p x   - 1 0 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 5 ) ;  
+ }  
+  
+ . d r o p d o w n - i t e m : h o v e r > . d r o p d o w n - s u b m e n u   {  
+         o p a c i t y :   1 ;  
+         v i s i b i l i t y :   v i s i b l e ;  
+         t r a n s f o r m :   t r a n s l a t e X ( 0 ) ;  
+ }  
+  
+ / *   A r r o w   i n d i c a t o r   f o r   n e s t e d   i t e m s   * /  
+ . h a s - s u b m e n u : : a f t e r   {  
+         c o n t e n t :   ' \ f 0 5 4 ' ;  
+         / *   F o n t A w e s o m e   c h e v r o n - r i g h t   * /  
+         f o n t - f a m i l y :   " F o n t   A w e s o m e   6   F r e e " ;  
+         f o n t - w e i g h t :   9 0 0 ;  
+         p o s i t i o n :   a b s o l u t e ;  
+         r i g h t :   1 r e m ;  
+         f o n t - s i z e :   0 . 7 r e m ;  
+         o p a c i t y :   0 . 5 ;  
+ }  
+ 

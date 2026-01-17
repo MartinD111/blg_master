@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <a href="{{ url_for('vw_carinjenje') }}"
+                class="text-sm text-gray-400 hover:text-white mb-1 inline-flex items-center gap-1"><i
+                    class="fas fa-arrow-left"></i> Back to Hub</a>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Customs Helper</h1>
+        </div>
+    </div>
+
+    <!-- Content (Placeholder for now) -->
+    <div
+        class="bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 rounded-[2.5rem] p-12 text-center shadow-2xl shadow-gray-200/20 dark:shadow-none">
+        <div
+            class="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-wrench text-3xl text-blue-600 dark:text-blue-400"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Customs Operations Helper</h2>
+        <p class="text-gray-500 max-w-md mx-auto">This module will assist with 1 TON declarations, T2L processing, and
+            document validation logic.</p>
+        <div class="mt-8">
+            <span
+                class="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                Coming Soon
+            </span>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

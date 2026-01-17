@@ -1,0 +1,25 @@
+/* HTMX Loading Indicator */
+.htmx-indicator {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color), #a29bfe);
+    z-index: 2000;
+    animation: htmx-progress 2s infinite ease-in-out;
+}
+
+.htmx-request .htmx-indicator {
+    display: block;
+}
+
+.htmx-request.htmx-indicator {
+    display: block;
+}
+
+@keyframes htmx-progress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}

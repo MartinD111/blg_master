@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                colors: { surface: { card: '#ffffff', cardDark: '#1c1c1e' } }
+            }
+        }
+    }
+</script>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
+
+    <!-- Header -->
+    <div class="mb-8 text-center md:text-left">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Toyota Vagoni</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">Train Loading Logic & WAG Gen</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left: Upload Form -->
+        <div class="lg:col-span-1 space-y-6">
+            <div
+                class="bg-white dark:bg-surface-cardDark rounded-3xl p-8 shadow-lg border border-gray-100 dark:border-gray-800">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                    <i data-lucide="upload-cloud" class="text-red-600"></i> New Train
+                </h2>
+
+                <form id="trainForm" class="space-y-4">
+                    <!-- Odstrel Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Odstrel File
+                            (Luka)</label>
+                        <div class="relative group">
+                            <input type="file" id="odstrelFile" name="odstrel"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+                            <div
+                                class="p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center gap-3 transition-colors group-hover:border-red-500">
+                                <i data-lucide="file-spreadsheet" class="text-gray-400 group-hover:text-red-500"></i>
+                                <span id="odstrelName" class="text-sm text-gray-500 truncate">Choose Excel...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plan Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Plan File</label>
+                        <div class="relative group">
+                            <input type="file" id="planFile" name="plan"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+                            <div
+                                class="p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center gap-3 transition-colors group-hover:border-red-500">
+                                <i data-lucide="file-spreadsheet" class="text-gray-400 group-hover:text-red-500"></i>
+                                <span id="planName" class="text-sm text-gray-500 truncate">Choose Excel...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- T1 Checkbox -->
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
+                        <input type="checkbox" id="isT1" name="isT1"
+                            class="w-5 h-5 text-red-600 rounded focus:ring-red-500 border-gray-300">
+                        <label for="isT1"
+                            class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none">Include
+                            T1 Values?</label>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="zap"></i> Process Train
+                    </button>
+
+                    <div id="loading" class="hidden text-center text-sm text-red-600 font-medium animate-pulse">
+                        Processing data...</div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: Results & Stats -->
+        <div class="lg:col-span-2 space-y-6 hidden" id="resultsPanel">
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div
+                    class="bg-white dark:bg-surface-cardDark p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <p class="text-xs text-gray-500 uppercase">Total Cars</p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white" id="statCars">-</p>
+                </div>
+                <div
+                    class="bg-white dark:bg-surface-cardDark p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <p class="text-xs text-gray-500 uppercase">Total Weight</p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white" id="statWeight">-</p>
+                </div>
+                <div
+                    class="bg-white dark:bg-surface-cardDark p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <p class="text-xs text-gray-500 uppercase">Wagons</p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white" id="statWagons">-</p>
+                </div>
+                <div
+                    class="bg-white dark:bg-surface-cardDark p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <p class="text-xs text-gray-500 uppercase">Value (T1)</p>
+                    <p class="text-xl font-black text-green-600" id="statValue">-</p>
+                </div>
+            </div>
+
+            <!-- Generated Report Text -->
+            <div class="bg-gray-900 text-gray-300 p-6 rounded-2xl font-mono text-sm relative group">
+                <button onclick="copyReport()"
+                    class="absolute top-4 right-4 p-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-white transition-colors">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+                <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">eTL Report Text</h3>
+                <pre id="reportText" class="whitespace-pre-wrap"></pre>
+            </div>
+
+            <!-- Wagons List (Preview) -->
+            <div
+                class="bg-white dark:bg-surface-cardDark rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
+                <div
+                    class="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-white/5 flex justify-between items-center">
+                    <h3 class="font-bold">Wagon Summary</h3>
+                    <button class="text-sm font-bold text-red-600 hover:underline">Download Full CSV</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-white/5">
+                            <tr>
+                                <th class="px-6 py-3">Wagon</th>
+                                <th class="px-6 py-3">Cars</th>
+                                <th class="px-6 py-3">Weight</th>
+                                <th class="px-6 py-3">LF</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wagonsTable" class="divide-y divide-gray-100 dark:divide-gray-800">
+                            <!-- JS Inject -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    // File Input UI Logic
+    ['odstrel', 'plan'].forEach(type => {
+        document.getElementById(`${type}File`).addEventListener('change', (e) => {
+            if (e.target.files[0]) document.getElementById(`${type}Name`).textContent = e.target.files[0].name;
+        });
+    });
+
+    document.getElementById('trainForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('resultsPanel');
+
+        loading.classList.remove('hidden');
+        results.classList.add('hidden');
+
+        const formData = new FormData(e.target);
+
+        try {
+            const res = await fetch('/api/toyota/process-train', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.error) throw new Error(data.error);
+
+            // Populate Stats
+            document.getElementById('statCars').textContent = data.stats.total_cars;
+            document.getElementById('statWeight').textContent = data.stats.total_weight.toLocaleString();
+            document.getElementById('statWagons').textContent = data.stats.wagons_count;
+            document.getElementById('statValue').textContent = data.stats.total_value.toLocaleString() + ' €';
+
+            // Populate Report
+            document.getElementById('reportText').textContent = data.report_text;
+
+            // Populate Wagons Table
+            const tbody = document.getElementById('wagonsTable');
+            tbody.innerHTML = '';
+            data.wagons.slice(0, 10).forEach(w => {
+                const tr = `<tr>
+                    <td class="px-6 py-3 font-mono">${w.MOT}</td>
+                    <td class="px-6 py-3 text-red-600 font-bold">${w.VIN}</td>
+                    <td class="px-6 py-3">${w.WEIGHT}</td>
+                    <td class="px-6 py-3">${w.LF}</td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', tr);
+            });
+
+            results.classList.remove('hidden');
+
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            loading.classList.add('hidden');
+        }
+    });
+
+    function copyReport() {
+        const text = document.getElementById('reportText').innerText;
+        navigator.clipboard.writeText(text);
+        alert('Copied to clipboard!');
+    }
+</script>
+{% endblock %}

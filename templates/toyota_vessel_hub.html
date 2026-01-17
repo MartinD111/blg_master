@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="glass-panel" style="max-width: 1000px; margin: 40px auto; padding: 40px;">
+    <div style="text-align: center; margin-bottom: 50px;">
+        <h1 class="text-glow" style="font-size: 3rem; margin-bottom: 10px;">Toyota Vessel Operations</h1>
+        <p style="opacity: 0.7; font-size: 1.2rem;">Select a tool to proceed</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+
+        <!-- T2L Card -->
+        <a href="{{ url_for('t2l', brand='toyota') }}" class="module-card" style="text-decoration: none; color: white;">
+            <div class="card-icon" style="background: linear-gradient(135deg, #eb0a1e 0%, #ff5f6d 100%);">
+                <i class="fas fa-list-alt"></i>
+            </div>
+            <h3>T2L Helper</h3>
+            <p>Generate ATT.LISTA based on VINs and DIZ numbers.</p>
+        </a>
+
+        <!-- Damage Report Card -->
+        <a href="{{ url_for('toyota_damage_report') }}" class="module-card"
+            style="text-decoration: none; color: white;">
+            <div class="card-icon" style="background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%);">
+                <i class="fas fa-car-crash"></i>
+            </div>
+            <h3>Damage Report</h3>
+            <p>Process manifest and generate damage report with photos/text.</p>
+        </a>
+
+        <!-- DVH Helper Card -->
+        <a href="{{ url_for('toyota_dvh_pro') }}" class="module-card" style="text-decoration: none; color: white;">
+            <div class="card-icon" style="background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);">
+                <i class="fas fa-ship"></i>
+            </div>
+            <h3>DVH Helper & DIZ</h3>
+            <p>New! Vessel scheduling and DIZ splitting tool.</p>
+        </a>
+
+        <!-- Customs Card -->
+        <a href="{{ url_for('toyota_customs') }}" class="module-card" style="text-decoration: none; color: white;">
+            <div class="card-icon" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <i class="fas fa-file-contract"></i>
+            </div>
+            <h3>Customs Helper</h3>
+            <p>Prepare customs documentation and verified lists.</p>
+        </a>
+
+    </div>
+</div>
+
+<style>
+    .module-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 30px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .module-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .module-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.4rem;
+        font-weight: 600;
+    }
+
+    .module-card p {
+        margin: 0;
+        font-size: 0.95rem;
+        opacity: 0.7;
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}

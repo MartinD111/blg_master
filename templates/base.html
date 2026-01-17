@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLG Operativa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/htmx.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.10"
+        integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+        crossorigin="anonymous"></script>
+</head>
+
+<body hx-boost="true" hx-target=".main-content" hx-select=".main-content" hx-indicator=".htmx-indicator">
+    <div class="htmx-indicator"></div>
+
+    <!-- Sticky Glass Header -->
+    <header>
+        <div class="header-left">
+            <a href="{{ url_for('index') }}" style="text-decoration:none; color:inherit;">
+                <span class="text-glow">BLG OPERATIVA</span>
+            </a>
+        </div>
+
+        <div class="header-center">
+            <nav>
+                <ul class="nav-menu">
+
+                    <!-- 1. Trenutna situacija (Flattened) -->
+                    <li class="nav-item">
+                        <a href="{{ url_for('wip') }}" class="nav-link">
+                            Trenutna situacija
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="{{ url_for('wip') }}" class="dropdown-link">Stock
+                                    Comparison</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('wip') }}" class="dropdown-link">Daily
+                                    Flow</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('wip') }}" class="dropdown-link">Forecast</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 2. Toyota -->
+                    <li class="nav-item">
+                        <a href="{{ url_for('hub', name='toyota') }}" class="nav-link">
+                            Toyota
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="{{ url_for('t2l', brand='toyota') }}"
+                                    class="dropdown-link"><i class="fas fa-list"></i> T2L - ATT.Lista</a></li>
+
+                            <!-- Toyota Vessel Section -->
+                            <div
+                                class="dropdown-divider text-xs font-bold text-gray-400 px-4 py-1 uppercase tracking-wider">
+                                Toyota Vessel
+                            </div>
+                            <li class="dropdown-item">
+                                {# <a href="{{ url_for('toyota_vessel_hub') }}" class="dropdown-link"> #}
+                                    <a href="#" class="dropdown-link">
+                                        <i class="fas fa-ship"></i> Vessel Hub
+                                    </a>
+                            </li>
+                            <li class="dropdown-item">
+                                <a href="{{ url_for('toyota_damage_report') }}" class="dropdown-link">
+                                    <i class="fas fa-exclamation-triangle"></i> Damage Report
+                                </a>
+                            </li>
+                            <li class="dropdown-item">
+                                <a href="{{ url_for('toyota_dvh_helper') }}" class="dropdown-link">
+                                    <i class="fas fa-tools"></i> DVH Helper
+                                </a>
+                            </li>
+                            <li class="dropdown-item">
+                                <a href="{{ url_for('toyota_diz_splitter') }}" class="dropdown-link">
+                                    <i class="fas fa-cubes"></i> DIZ Splitter
+                                </a>
+                            </li>
+                            <li class="dropdown-item"><a href="{{ url_for('toyota_customs') }}" class="dropdown-link"><i
+                                        class="fas fa-file-contract"></i> Customs Helper</a></li>
+
+                            <!-- Other -->
+                            <div class="dropdown-divider border-t border-gray-700 my-1"></div>
+                            <li class="dropdown-item"><a href="{{ url_for('toyota_vagoni') }}" class="dropdown-link"><i
+                                        class="fas fa-train"></i>
+                                    Vagoni</a></li>
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i class="fas fa-truck"></i>
+                                    Kamioni</a></li>
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i
+                                        class="fas fa-exchange-alt"></i> Tramak</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 3. Volkswagen (Simplified) -->
+                    <li class="nav-item">
+                        <a href="{{ url_for('hub', name='volkswagen') }}" class="nav-link">
+                            Volkswagen
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item">
+                                <a href="{{ url_for('vw_stock') }}" class="dropdown-link">
+                                    <i class="fas fa-cubes"></i> Stock Report
+                                </a>
+                            </li>
+                            <li class="dropdown-item">
+                                <a href="{{ url_for('vw_carinjenje') }}" class="dropdown-link">
+                                    <i class="fas fa-file-contract"></i> Carinjenje
+                                </a>
+                            </li>
+                            <li class="dropdown-item">
+                                <a href="{{ url_for('t2l', brand='volkswagen') }}" class="dropdown-link">
+                                    <i class="fas fa-list"></i> T2L List
+                                </a>
+                            </li>
+                            <div class="dropdown-divider border-t border-gray-700 my-1 mx-2"></div>
+                            <li class="dropdown-item">
+                                <a href="#" class="dropdown-link">
+                                    <i class="fas fa-ship"></i> Ladje (Ships)
+                                </a>
+                            </li>
+                            <li class="dropdown-item">
+                                <a href="{{ url_for('vw_kamioni_hub') }}" class="dropdown-link">
+                                    <i class="fas fa-truck"></i> Kamioni (Trucks)
+                                </a>
+                            </li>
+                            <li class="dropdown-item">
+                                <a href="{{ url_for('vw_dvh_helper') }}" class="dropdown-link">
+                                    <i class="fas fa-tools"></i> DVH Helper
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 4. Others -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            Others
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i class="fas fa-file-alt"></i>
+                                    Docs</a></li>
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i
+                                        class="fas fa-exclamation-triangle"></i> Letter of Protest</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 5. e-CMR Manager -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            e-CMR Manager
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i
+                                        class="fas fa-folder-open"></i> All-in-One Tool</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 6. Vagoni (General) -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            Vagoni
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i
+                                        class="fas fa-map-marker-alt"></i> Sledilnik</a></li>
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i class="fas fa-subway"></i>
+                                    Railway Agency</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 7. Statistika -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            Statistika
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i class="fas fa-chart-bar"></i>
+                                    General Stats</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 8. Fakture -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            Fakture
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i
+                                        class="fas fa-file-invoice-dollar"></i> Billing</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 9. Produktivnost (Admin) -->
+                    {% if user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" style="color: #ff9999;">
+                            Produktivnost
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i class="fas fa-users-cog"></i>
+                                    Management</a></li>
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i
+                                        class="fas fa-user-clock"></i> User Productivity</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="glass-input" placeholder="Global search...">
+            </div>
+
+            {% if user %}
+            <a href="{{ url_for('profile') }}" class="user-profile" style="text-decoration:none; color:inherit;">
+                <div class="avatar-circle">
+                    {% if user.avatar %}
+                    {{ user.avatar | safe }}
+                    {% else %}
+                    {{ user.name[0] }}
+                    {% endif %}
+                </div>
+                <span>{{ user.name }}</span>
+            </a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" style="color:white; opacity:0.7; text-decoration:none;"><i
+                    class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </header>
+
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

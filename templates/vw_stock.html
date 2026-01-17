@@ -1,0 +1,659 @@
+{% extends "base.html" if not spa_mode else "base_partial.html" %}
+
+{% block content %}
+<!-- Tool Specific Dependencies -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Inter', 'sans-serif'],
+                },
+                borderRadius: {
+                    '4xl': '2rem',
+                    '5xl': '2.5rem',
+                },
+                colors: {
+                    surface: {
+                        light: '#f2f4f7',
+                        dark: '#0b0b0b',
+                        card: '#ffffff',
+                        cardDark: '#1c1c1e',
+                    },
+                    primary: {
+                        DEFAULT: '#0050d5',
+                        dark: '#5c9dff'
+                    }
+                }
+            }
+        }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    /* Scoped App Wrapper */
+    #vw-stock-tool {
+        font-family: 'Inter', sans-serif;
+    }
+
+    #vw-stock-tool * {
+        transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, color 0.3s ease;
+    }
+
+    .drag-active {
+        border-color: #0050d5 !important;
+        background-color: rgba(0, 80, 213, 0.08) !important;
+        transform: scale(0.99);
+    }
+
+    /* Custom Scrollbar for the preview area if needed */
+    #vw-stock-tool ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #vw-stock-tool ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    #vw-stock-tool ::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 10px;
+    }
+
+    #vw-stock-tool.dark ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+    }
+
+    #vw-stock-tool ::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+    }
+</style>
+
+<!-- Main App Wrapper -->
+<div id="vw-stock-tool"
+    class="bg-transparent text-gray-900 dark:text-gray-100 min-h-screen flex flex-col selection:bg-primary selection:text-white">
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 md:p-8 max-w-5xl mx-auto w-full flex flex-col gap-8">
+
+        <div class="flex justify-center mb-4 pt-8">
+            <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Current Situation</h1>
+        </div>
+
+        <div id="drop-zone"
+            class="relative group overflow-hidden bg-surface-card dark:bg-surface-cardDark border-[3px] border-dashed border-gray-200 dark:border-gray-700 rounded-4xl p-16 text-center cursor-pointer transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5">
+            <input type="file" id="file-input" class="hidden" accept=".csv, .xlsx, .xls">
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            </div>
+            <div class="relative z-10 flex flex-col items-center gap-4">
+                <div
+                    class="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-3xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                    <i data-lucide="upload-cloud" class="w-10 h-10 text-primary dark:text-primary-dark"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100" data-key="dropTitle">Povleci in spusti
+                    Excel</h2>
+                <p class="text-gray-500 dark:text-gray-400 font-medium" data-key="dropSubtitle">Podprto: .xlsx, .csv</p>
+                <button onclick="document.getElementById('file-input').click()"
+                    class="mt-4 bg-primary hover:bg-blue-700 text-white px-8 py-3.5 rounded-full font-semibold shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center gap-2"
+                    data-key="browseBtn">
+                    <i data-lucide="folder-open" class="w-4 h-4"></i>
+                    Izberi datoteko
+                </button>
+            </div>
+        </div>
+
+        <div id="processing-status"
+            class="hidden sticky top-4 z-10 bg-surface-card/90 dark:bg-surface-cardDark/90 backdrop-blur-md border border-gray-100 dark:border-gray-800 rounded-3xl p-4 shadow-xl flex flex-wrap gap-4 justify-between items-center animate-fade-in-up">
+            <div class="flex items-center gap-3 px-2">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <div>
+                    <p class="font-bold text-gray-900 dark:text-gray-100"><span data-key="statusTitle">Status:</span>
+                        <span class="text-primary dark:text-primary-dark" id="status-text">Pripravljen</span>
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-key="filterInfo">Filter: Status
+                        19, Destinacije</p>
+                </div>
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto">
+                <button onclick="resetApp()"
+                    class="flex-1 sm:flex-none px-6 py-3 rounded-full text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    data-key="resetBtn">Ponastavi</button>
+                <button onclick="downloadExcel()" id="download-btn"
+                    class="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full shadow-lg shadow-green-600/20 font-bold flex items-center justify-center gap-2 transition-transform active:scale-95"
+                    data-key="downloadBtn">
+                    <i data-lucide="download" class="w-4 h-4"></i> Prenesi Excel
+                </button>
+            </div>
+        </div>
+
+        <div id="preview-area" class="hidden grid grid-cols-1 gap-8 pb-20">
+            <!-- Content via JS -->
+        </div>
+
+    </main>
+
+    <footer class="text-center py-8 text-gray-400 text-xs font-medium uppercase tracking-widest">
+        <p>Martin's Tools &copy; 2025</p>
+    </footer>
+
+</div>
+
+<script>
+    const DESTINATIONS = {
+        'EGYAG': 'ALEXANDRIA (EGIPT)',
+        'AZEMQ': 'AZERBAIJAN',
+        'CYPEY': 'LIMASSOL (CIPER)',
+        'GEODB': 'GEORGIA',
+        'CYPXP': 'LIMASSOL (CIPER)',
+        'CYPEZ': 'NORTH CYPRUS',
+        'GRCGR': 'PIRAEUS (GRČIJA)',
+        'GRCDP': 'PIRAEUS (GRČIJA)',
+        'ILASH': 'HAIFA',
+        'ILHFA': 'HAIFA',
+        'ILPAL': 'PALESTINA (HAIFA)',
+        'LBNLJ': 'BEIRUT',
+        'MTSGW': 'LA VALLETTA (MALTA)',
+        'TNTUN': 'LA GOULLETE (TUNISIJA)',
+        'TREYP': 'EFESAN (TURČIJA)'
+    };
+
+    const TEXTS = {
+        sl: {
+            dropTitle: "Povleci in spusti Excel",
+            dropSubtitle: "Podprto: .xlsx, .csv",
+            browseBtn: "Izberi datoteko",
+            statusTitle: "Status:",
+            filterInfo: "Filter: Status 19, Destinacije",
+            resetBtn: "Ponastavi",
+            downloadBtn: "Prenesi Excel",
+            tableModel: "Model",
+            tableCount: "Q",
+            noData: "Ni podatkov za prikaz.",
+            processed: "Obdelano",
+            errorFile: "Napaka pri branju datoteke."
+        },
+        en: {
+            dropTitle: "Drag & Drop Excel",
+            dropSubtitle: "Supported: .xlsx, .csv",
+            browseBtn: "Select File",
+            statusTitle: "Status:",
+            filterInfo: "Filter: Status 19, Destinations",
+            resetBtn: "Reset",
+            downloadBtn: "Download Excel",
+            tableModel: "Model",
+            tableCount: "Q",
+            noData: "No data to display.",
+            processed: "Processed",
+            errorFile: "Error reading file."
+        }
+    };
+
+    let currentLang = 'sl';
+    let processedDataForExport = [];
+
+    // Initialization Function
+    function initVWStock() {
+        lucide.createIcons();
+        applyLanguage();
+
+        // --- CRITICAL FIX FOR DARK MODE MATCHING MAIN UI ---
+        // Instead of scoping dark mode to #vw-stock-tool, we apply it to the <html parent element/document root
+        // This ensures the entire page (including backgrounds outside the wrapper if any) respects the theme.
+        // It also aligns with how standard Tailwind dark:'class' works.
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Re-bind events if they aren't bound (idempotency check or just pure replacement which is fine for direct element IDs)
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        if (dropZone) {
+            // Remove old listeners to be safe? JS garbage collection usually handles this on swap, 
+            // but since we are re-running this script block, we should be fine.
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-active'); });
+            dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('drag-active'); });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-active');
+                if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) handleFile(e.target.files[0]);
+            });
+        }
+    }
+
+    // Run Initialization Immediately
+    initVWStock();
+
+    function applyLanguage() {
+        document.querySelectorAll('[data-key]').forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (TEXTS[currentLang][key]) el.textContent = TEXTS[currentLang][key];
+        });
+    }
+
+    function getFormattedDate() {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        return `${dd}.${mm}.${yyyy}`;
+    }
+
+    function cleanDestinationName(fullName) {
+        return fullName.split('(')[0].trim();
+    }
+
+    function determinePowertrain(powerSourceVal) {
+        const ps = powerSourceVal ? powerSourceVal.toString().toUpperCase().trim() : '';
+        if (ps.includes('BEV') || ps.includes('ELECTRIC')) return 'BEV';
+        if (ps.includes('HYBRID') || ps.includes('PHEV') || ps.includes('HEV')) return 'HYBRID';
+        return 'ICE';
+    }
+
+    // Event Listeners are now inside initVWStock()
+
+    function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                processData(jsonData);
+            } catch (err) {
+                console.error(err);
+                alert(TEXTS[currentLang].errorFile);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function processData(rows) {
+        if (rows.length < 2) return;
+
+        let headerRowIdx = -1;
+        let headers = [];
+
+        for (let i = 0; i < Math.min(rows.length, 20); i++) {
+            if (!rows[i]) continue;
+            const rowStr = rows[i].map(c => c ? c.toString().toUpperCase() : '').join(';');
+            if (rowStr.includes('DESTINATION') && rowStr.includes('STATUS')) {
+                headerRowIdx = i;
+                headers = rows[i].map(h => h ? h.toString().trim().toUpperCase() : '');
+                break;
+            }
+        }
+
+        if (headerRowIdx === -1) {
+            headerRowIdx = 0;
+            headers = rows[0].map(h => h ? h.toString().trim().toUpperCase() : '');
+        }
+
+        const idxStatus = headers.indexOf('STATUS');
+        const idxDest = headers.indexOf('DESTINATION');
+        const idxManufac = headers.indexOf('MANUFAC');
+
+        let idxModel = headers.indexOf('DESCRIPTION');
+        if (idxModel === -1) idxModel = headers.indexOf('MODEL');
+        if (idxModel === -1) idxModel = headers.indexOf('MODEL DESCRIPTION');
+        if (idxModel === -1) idxModel = headers.indexOf('MODEL_DESC');
+
+        const idxPower = headers.indexOf('POWER SOURCE');
+
+        if (idxStatus === -1 || idxDest === -1) {
+            alert("Napaka: Ne najdem stolpcev STATUS ali DESTINATION. Preverite strukturo datoteke.");
+            return;
+        }
+
+        const groupedData = {};
+
+        for (let i = headerRowIdx + 1; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || row.length === 0) continue;
+
+            const status = row[idxStatus] ? row[idxStatus].toString().trim() : '';
+            const destCode = row[idxDest] ? row[idxDest].toString().trim() : '';
+
+            if (status !== '19') continue;
+            if (!DESTINATIONS.hasOwnProperty(destCode)) continue;
+
+            const fullDestName = DESTINATIONS[destCode];
+            const destName = cleanDestinationName(fullDestName);
+
+            let manufac = row[idxManufac] ? row[idxManufac].toString().trim().toUpperCase() : 'UNKNOWN';
+            if (manufac === 'VWNF') manufac = 'VW';
+
+            // --- ALEXANDRIA EXCLUSION LOGIC ---
+            if (destName === 'ALEXANDRIA' && (manufac === 'SEAT' || manufac === 'SKODA')) {
+                continue;
+            }
+
+            const model = (idxModel !== -1 && row[idxModel]) ? row[idxModel].toString().trim() : 'UNKNOWN';
+
+            const powerSourceVal = (idxPower !== -1 && row[idxPower]) ? row[idxPower] : '';
+            const type = determinePowertrain(powerSourceVal);
+
+            if (!groupedData[destName]) groupedData[destName] = {};
+            if (!groupedData[destName][manufac]) groupedData[destName][manufac] = {};
+
+            if (!groupedData[destName][manufac][model]) {
+                groupedData[destName][manufac][model] = { count: 0, ice: 0, hybrid: 0, bev: 0 };
+            }
+
+            groupedData[destName][manufac][model].count++;
+            if (type === 'ICE') groupedData[destName][manufac][model].ice++;
+            else if (type === 'HYBRID') groupedData[destName][manufac][model].hybrid++;
+            else if (type === 'BEV') groupedData[destName][manufac][model].bev++;
+        }
+
+        processedDataForExport = Object.keys(groupedData).sort().map(dest => {
+            const manufacObj = groupedData[dest];
+            let destGrandTotal = 0;
+
+            const manufacturers = Object.keys(manufacObj).sort().map(mName => {
+                const modelsObj = manufacObj[mName];
+                const modelsList = Object.keys(modelsObj).sort().map(modName => {
+                    return { name: modName, ...modelsObj[modName] };
+                });
+                const manTotal = modelsList.reduce((sum, m) => sum + m.count, 0);
+                destGrandTotal += manTotal;
+                return { name: mName, models: modelsList, total: manTotal };
+            });
+
+            return { destination: dest, manufacturers: manufacturers, grandTotal: destGrandTotal };
+        });
+
+        document.getElementById('processing-status').classList.remove('hidden');
+        document.getElementById('processing-status').classList.add('flex');
+        document.getElementById('download-btn').classList.remove('hidden');
+        document.getElementById('status-text').textContent = `${TEXTS[currentLang].processed} (${rows.length})`;
+
+        renderPreview(processedDataForExport);
+    }
+
+    // --- RENDERING ---
+    function renderPreview(data) {
+        const container = document.getElementById('preview-area');
+        container.innerHTML = '';
+        container.classList.remove('hidden');
+
+        if (data.length === 0) {
+            container.innerHTML = `<p class="text-center text-gray-400 font-medium py-10">${TEXTS[currentLang].noData}</p>`;
+            return;
+        }
+
+        data.forEach(group => {
+            let manufacturersHtml = '';
+
+            group.manufacturers.forEach((man, index) => {
+                let rowsHtml = '';
+
+                man.models.forEach(model => {
+                    let infoBadges = '';
+                    if (model.bev > 0) {
+                        infoBadges += `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 mr-2"><span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>BEV</span>`;
+                    }
+                    if (model.hybrid > 0) {
+                        infoBadges += `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>${model.hybrid} HYBRID</span>`;
+                    }
+
+                    rowsHtml += `
+                        <tr class="group/row transition-colors hover:bg-gray-50 dark:hover:bg-white/5">
+                            <td class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800">${model.name}</td>
+                            <td class="px-4 py-3 text-center border-b border-gray-100 dark:border-gray-800 border-l border-r border-dashed dark:border-gray-800">
+                                <span class="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg font-mono font-bold text-primary dark:text-primary-dark min-w-[2rem]">${model.count}</span>
+                            </td>
+                            <td class="px-4 py-3 text-center border-b border-gray-100 dark:border-gray-800">${infoBadges}</td>
+                        </tr>
+                    `;
+                });
+
+                // --- SEPARATOR LINE (No Gap) ---
+                const separatorClass = index > 0 ? 'border-t border-gray-300 dark:border-gray-600' : '';
+
+                manufacturersHtml += `
+                    <div class="px-2 sm:px-6 ${separatorClass}">
+                        <div class="flex justify-between items-center mb-4 pl-2 border-l-4 border-primary dark:border-primary-dark mt-4">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">${man.name}</h3>
+                            <div class="px-3 py-1 bg-primary/10 dark:bg-primary/20 rounded-full">
+                                <span class="text-xs font-bold text-primary dark:text-primary-dark uppercase mr-1">Total</span>
+                                <span class="text-sm font-black text-gray-900 dark:text-white">${man.total}</span>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-black/20 mb-4">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100/80 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase font-bold text-[10px] tracking-wider">
+                                    <tr>
+                                        <th class="px-4 py-3 text-center w-1/2">${TEXTS[currentLang].tableModel}</th>
+                                        <th class="px-4 py-3 text-center w-24">Q</th>
+                                        <th class="px-4 py-3 text-center w-1/3"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                    ${rowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const card = document.createElement('div');
+            card.className = "bg-surface-card dark:bg-surface-cardDark rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden transition-all hover:shadow-2xl hover:translate-y-[-2px] border border-white/50 dark:border-gray-800 flex flex-col";
+
+            card.innerHTML = `
+                <div class="bg-gradient-to-r from-gray-50 to-white dark:from-white/5 dark:to-transparent p-6 sm:p-8 border-b border-gray-100 dark:border-gray-800">
+                    <h2 class="text-4xl font-black uppercase tracking-tighter text-center text-transparent bg-clip-text bg-gradient-to-br from-blue-900 to-blue-600 dark:from-blue-100 dark:to-blue-400 opacity-90">${group.destination}</h2>
+                </div>
+                <div class="py-6 flex-grow space-y-0">
+                    ${manufacturersHtml}
+                </div>
+                <div class="p-2">
+                    <div class="bg-gray-900 dark:bg-blue-600 text-white rounded-[2rem] p-5 text-center shadow-lg mx-2 mb-2 relative overflow-hidden group/footer">
+                        <div class="absolute inset-0 bg-white/10 opacity-0 group-hover/footer:opacity-100 transition-opacity"></div>
+                        <p class="text-xs uppercase font-bold tracking-[0.2em] text-white/60 mb-1">Destination Total</p>
+                        <p class="text-4xl font-black tracking-tight">${group.grandTotal}</p>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+    }
+
+    // --- GRID LAYOUT EXPORT ---
+    function downloadExcel() {
+        if (processedDataForExport.length === 0) return;
+        const wb = XLSX.utils.book_new();
+
+        const BLOCKS_PER_ROW = 4;
+        const BLOCK_COLS = 3;
+        const GAP_COLS = 1;
+        const STRIDE = BLOCK_COLS + GAP_COLS;
+
+        let wsData = [];
+        const dateStr = getFormattedDate();
+        wsData[0] = ["VW CURRENT STOCK REPORT", `Generated: ${dateStr}`];
+
+        let columnNextRows = Array(BLOCKS_PER_ROW).fill(2);
+        let merges = [];
+        let maxTotalCols = 0;
+        // Track where to apply separators
+        let borderRows = [];
+
+        processedDataForExport.forEach((group, index) => {
+            let colIdx = index % BLOCKS_PER_ROW;
+            let startRow = columnNextRows[colIdx];
+            let startCol = colIdx * STRIDE;
+
+            let blockRows = [];
+
+            // Dest Title
+            blockRows.push([group.destination.toUpperCase(), "", ""]);
+            merges.push({ s: { r: startRow, c: startCol }, e: { r: startRow, c: startCol + 1 } });
+
+            // Header
+            blockRows.push(["MODEL", "Q", ""]);
+
+            group.manufacturers.forEach((man, manIdx) => {
+                // Manufac Header
+                blockRows.push([man.name, `Total: ${man.total}`, ""]);
+
+                // Mark this row index (the header itself) for a top border if it's NOT the first manufacturer
+                if (manIdx > 0) {
+                    borderRows.push({
+                        r: startRow + blockRows.length - 1, // Index of the Manufac Header row
+                        c: startCol
+                    });
+                }
+
+                man.models.forEach(model => {
+                    let infoStr = "";
+                    if (model.bev > 0) infoStr += "BEV ";
+                    if (model.hybrid > 0) infoStr += `${model.hybrid} Hybrid`;
+                    blockRows.push([model.name, model.count, infoStr.trim()]);
+                });
+
+                // NO spacer at end of manufac (brez presledka)
+            });
+
+            // Footer
+            blockRows.push(["DESTINATION TOTAL:", group.grandTotal, ""]);
+
+            blockRows.forEach((row, rIdx) => {
+                let targetRow = startRow + rIdx;
+                if (!wsData[targetRow]) wsData[targetRow] = [];
+                row.forEach((val, cIdx) => {
+                    wsData[targetRow][startCol + cIdx] = val;
+                });
+            });
+
+            columnNextRows[colIdx] = startRow + blockRows.length + 2;
+            if ((startCol + BLOCK_COLS) > maxTotalCols) maxTotalCols = startCol + BLOCK_COLS;
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws['!merges'] = merges;
+
+        // Apply Styles
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+                if (!ws[cellRef]) continue;
+
+                if (!ws[cellRef].s) ws[cellRef].s = {};
+                ws[cellRef].s.alignment = {
+                    horizontal: "center",
+                    vertical: "center",
+                    wrapText: false // Explicitly Disable Wrap
+                };
+                ws[cellRef].s.font = { name: "Calibri", sz: 11 };
+
+                if (R === 0) ws[cellRef].s.font = { bold: true, sz: 12, name: "Calibri" };
+
+                const cellVal = ws[cellRef].v;
+
+                let isDestName = false;
+                for (let k in DESTINATIONS) {
+                    if (typeof cellVal === 'string' && cleanDestinationName(DESTINATIONS[k]).toUpperCase() === cellVal) {
+                        isDestName = true;
+                        break;
+                    }
+                }
+                if (isDestName) ws[cellRef].s.font = { bold: true, sz: 14, name: "Calibri" };
+
+                if (cellVal === "MODEL") ws[cellRef].s.font = { bold: true, name: "Calibri" };
+
+                const nextCell = ws[XLSX.utils.encode_cell({ r: R, c: C + 1 })];
+                if (nextCell && typeof nextCell.v === 'string' && nextCell.v.startsWith("Total:")) {
+                    ws[cellRef].s.font = { bold: true, name: "Calibri" };
+                    if (!nextCell.s) nextCell.s = {};
+                    nextCell.s.font = { bold: true, name: "Calibri" };
+                    nextCell.s.alignment = { horizontal: "center", vertical: "center", wrapText: false };
+                }
+
+                if (cellVal === "DESTINATION TOTAL:") ws[cellRef].s.font = { bold: true, sz: 12, name: "Calibri" };
+            }
+        }
+
+        // --- APPLY SEPARATOR BORDERS (THIN TOP on HEADER ROW) ---
+        borderRows.forEach(item => {
+            for (let c = 0; c < BLOCK_COLS; c++) {
+                const cellRef = XLSX.utils.encode_cell({ r: item.r, c: item.c + c });
+                if (!ws[cellRef]) ws[cellRef] = { v: "", t: "s", s: {} };
+                if (!ws[cellRef].s) ws[cellRef].s = {};
+
+                // Thin Top Border on the Header Row directly
+                ws[cellRef].s.border = {
+                    top: { style: "thin", color: { auto: 1 } }
+                };
+            }
+        });
+
+        // --- AUTO-FIT LOGIC (CALCULATE MAX WIDTHS) ---
+        let colWidths = [];
+        // Init minimal widths
+        for (let i = 0; i < maxTotalCols; i++) {
+            colWidths[i] = 5; // Default minimal base
+        }
+
+        // Iterate ALL rows to find max content length per column
+        wsData.forEach(row => {
+            if (row) {
+                row.forEach((cellVal, colIdx) => {
+                    if (cellVal) {
+                        const strVal = cellVal.toString();
+                        let len = strVal.length;
+                        // Add extra padding for aesthetics
+                        if (len > colWidths[colIdx]) {
+                            colWidths[colIdx] = len;
+                        }
+                    }
+                });
+            }
+        });
+
+        // Apply calculated widths, ensuring GAP columns stay narrow
+        let finalCols = [];
+        for (let i = 0; i < maxTotalCols; i++) {
+            let mod = i % STRIDE;
+            // Spacer column (every 4th) should stay narrow
+            if (mod === 3) {
+                finalCols.push({ wch: 5 });
+            } else {
+                // Data columns: use calculated width + padding
+                finalCols.push({ wch: colWidths[i] + 3 });
+            }
+        }
+        ws['!cols'] = finalCols;
+
+        XLSX.utils.book_append_sheet(wb, ws, "Stock Report");
+        XLSX.writeFile(wb, `VW_Stock_Report_${dateStr}.xlsx`);
+    }
+
+    function resetApp() {
+        document.getElementById('preview-area').innerHTML = '';
+        document.getElementById('preview-area').classList.add('hidden');
+        document.getElementById('processing-status').classList.remove('flex');
+        document.getElementById('processing-status').classList.add('hidden');
+        processedDataForExport = [];
+        document.getElementById('file-input').value = '';
+    }
+</script>
+{% endblock %}

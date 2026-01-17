@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Dashboard Header -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Volkswagen Dashboard</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Truck Dispatch & Logistics Overview</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-400 font-mono">{{ get_time() }}</span>
+        </div>
+    </div>
+
+    <!-- Live Operations Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+
+        <!-- Dispatch Stats (Trucks) -->
+        <div
+            class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden group">
+            <div
+                class="absolute top-0 right-0 p-8 opacity-20 transform rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                <i class="fas fa-truck-moving text-9xl text-white"></i>
+            </div>
+            <p class="text-blue-100 font-semibold uppercase tracking-wider mb-2">Trucks Dispatched (Today)</p>
+            <div class="flex items-baseline gap-2 mb-4">
+                <h3 class="text-5xl font-black">42</h3>
+                <span class="text-blue-200 font-bold text-lg">/ 60 Planned</span>
+            </div>
+            <div class="w-full bg-blue-800/50 rounded-full h-2 mb-4 backdrop-blur-sm">
+                <div class="bg-white h-2 rounded-full" style="width: 70%"></div>
+            </div>
+            <p class="text-sm text-blue-100">70% Completion Rate</p>
+        </div>
+
+        <!-- Previous Day Arrivals -->
+        <div
+            class="bg-white dark:bg-white/5 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-white/10 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-6 opacity-10">
+                <i class="fas fa-history text-8xl text-gray-500"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Yesterday's Arrivals</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Trucks arrived at compound</p>
+
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/20 text-green-600 flex items-center justify-center text-2xl font-bold">
+                    85
+                </div>
+                <div>
+                    <p class="font-bold text-gray-900 dark:text-white">Total Trucks</p>
+                    <p class="text-xs text-green-500">+12% vs Avg</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ship Dispatch Plan -->
+        <div
+            class="bg-white dark:bg-white/5 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-white/10 relative overflow-hidden group">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fas fa-ship text-blue-500"></i> Ship Dispatch Plan
+            </h3>
+
+            <div class="space-y-4">
+                <div
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5">
+                    <div>
+                        <p class="font-bold text-gray-900 dark:text-white text-sm">RCC PASSION</p>
+                        <p class="text-xs text-gray-500">ETA: Today 14:00</p>
+                    </div>
+                    <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-bold">In Port</span>
+                </div>
+                <div
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5">
+                    <div>
+                        <p class="font-bold text-gray-900 dark:text-white text-sm">GLOVIS STAR</p>
+                        <p class="text-xs text-gray-500">ETA: 19.01. 08:00</p>
+                    </div>
+                    <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-bold">Planned</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modules Grid -->
+    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-6 px-1">Volkswagen Modules</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Stock Module -->
+        <a href="{{ url_for('vw_stock') }}"
+            class="group block p-6 bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-900/10 transition-all relative overflow-hidden">
+            <div
+                class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform relative z-10">
+                <i class="fas fa-cubes text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 relative z-10">Stock Report</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 relative z-10">Inventory management and reporting.
+            </p>
+        </a>
+
+        <!-- Carinjenje (Customs) -->
+        <a href="{{ url_for('vw_carinjenje') }}"
+            class="group block p-6 bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-900/10 transition-all relative overflow-hidden">
+            <div
+                class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform relative z-10">
+                <i class="fas fa-file-contract text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 relative z-10">Carinjenje Hub</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 relative z-10">A.TR, HS Codes, T2L, Customs tools.
+            </p>
+        </a>
+
+        <!-- Kamioni (Trucks) -->
+        <a href="{{ url_for('vw_kamioni_hub') }}"
+            class="group block p-6 bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-900/10 transition-all relative overflow-hidden">
+            <div
+                class="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-green-600/20 group-hover:scale-110 transition-transform relative z-10">
+                <i class="fas fa-truck text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 relative z-10">Kamioni (Trucks)</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 relative z-10">Announcements, Arrivals, Inspections.
+            </p>
+        </a>
+
+        <!-- DVH Helper -->
+        <a href="{{ url_for('vw_dvh_helper') }}"
+            class="group block p-6 bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-900/10 transition-all relative overflow-hidden">
+            <div
+                class="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-purple-600/20 group-hover:scale-110 transition-transform relative z-10">
+                <i class="fas fa-tools text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 relative z-10">DVH Helper</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 relative z-10">Data Verification Helper tools.</p>
+        </a>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Dashboard Header -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Toyota Dashboard</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Daily Operations Overview</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-400 font-mono">{{ get_time() }}</span>
+        </div>
+    </div>
+
+    <!-- Live Operations Stats (Mocked for Demo) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+
+        <!-- Today's Loading -->
+        <div
+            class="bg-gradient-to-br from-red-600 to-red-700 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden group">
+            <div
+                class="absolute top-0 right-0 p-8 opacity-20 transform rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                <i class="fas fa-truck-loading text-9xl text-white"></i>
+            </div>
+            <p class="text-red-100 font-semibold uppercase tracking-wider mb-2">Vehicles Loading Today</p>
+            <div class="flex items-baseline gap-2 mb-4">
+                <h3 class="text-5xl font-black">124</h3>
+                <span class="text-red-200 font-bold text-lg">/ 150 Planned</span>
+            </div>
+            <div class="w-full bg-red-800/50 rounded-full h-2 mb-4 backdrop-blur-sm">
+                <div class="bg-white h-2 rounded-full" style="width: 82%"></div>
+            </div>
+            <p class="text-sm text-red-100">82% Completion Rate</p>
+        </div>
+
+        <!-- Train Plan -->
+        <div
+            class="bg-white dark:bg-white/5 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-white/10 relative overflow-hidden group">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                <i class="fas fa-train text-gray-400"></i> Train Plan
+            </h3>
+
+            <div class="space-y-4 relative z-10">
+                <!-- Train Item 1 -->
+                <div
+                    class="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-red-500/30 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 flex items-center justify-center font-bold">
+                            1</div>
+                        <div>
+                            <p class="font-bold text-gray-900 dark:text-white">Train #9021</p>
+                            <p class="text-xs text-gray-500">Dest: Vienna</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold">Ready</span>
+                </div>
+
+                <!-- Train Item 2 -->
+                <div
+                    class="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-red-500/30 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 flex items-center justify-center font-bold">
+                            2</div>
+                        <div>
+                            <p class="font-bold text-gray-900 dark:text-white">Train #4412</p>
+                            <p class="text-xs text-gray-500">Dest: Munich</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-bold">Loading</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modules Grid -->
+    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-6 px-1">Toyota Modules</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Vagoni / Trains Module -->
+        <a href="{{ url_for('toyota_vagoni') }}"
+            class="group block p-6 bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 hover:border-red-500/30 hover:shadow-2xl hover:shadow-red-900/10 transition-all relative overflow-hidden">
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-red-500/0 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity">
+            </div>
+            <div
+                class="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-red-600/20 group-hover:scale-110 transition-transform relative z-10">
+                <i class="fas fa-train text-xl"></i>
+            </div>
+            <h3
+                class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-red-500 transition-colors relative z-10">
+                Vagoni (Train Loading)</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 relative z-10">Process Odstrel/Plan files, generate
+                WAG lists and eTL reports.</p>
+            <div
+                class="flex items-center text-red-600 dark:text-red-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 relative z-10">
+                Open Tool <i class="fas fa-arrow-right ml-2"></i>
+            </div>
+        </a>
+
+        <!-- Customs -->
+        <a href="{{ url_for('toyota_customs') }}"
+            class="group block p-6 bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:shadow-2xl transition-all relative overflow-hidden opacity-80 hover:opacity-100">
+            <div
+                class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-gray-600 dark:text-gray-300 mb-4 shadow-sm relative z-10">
+                <i class="fas fa-stamp text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 relative z-10">Carinjenje</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 relative z-10">Customs declarations and T2L
+                processing.</p>
+        </a>
+
+        <!-- Ships -->
+        <a href="#"
+            class="group block p-6 bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:shadow-2xl transition-all relative overflow-hidden opacity-80 hover:opacity-100">
+            <div
+                class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-gray-600 dark:text-gray-300 mb-4 shadow-sm relative z-10">
+                <i class="fas fa-ship text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 relative z-10">Ladje</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 relative z-10">Vessel schedule and discharge
+                planning.</p>
+        </a>
+
+    </div>
+</div>
+{% endblock %}

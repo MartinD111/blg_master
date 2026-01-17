@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                colors: { toyota: { red: '#EB0A1E' } }
+            }
+        }
+    }
+</script>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
+
+    <!-- Header -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                <span class="w-3 h-8 bg-toyota-red rounded-full block"></span>
+                Toyota Carinjenje <span
+                    class="text-sm font-normal text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">DVH
+                    Helper</span>
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2 ml-6">Generate PL/CZ/UA Excel lists from Master Manifest.
+            </p>
+        </div>
+
+        <!-- Action Buttons (Optional) -->
+        <div class="flex gap-2">
+            <!-- No extra actions currently -->
+        </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8">
+
+        <!-- Step 1: Vessel Info -->
+        <div class="mb-8">
+            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <i data-lucide="ship" class="w-4 h-4"></i> 1. Podatki o ladji
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2">VESSEL NAME</label>
+                    <input type="text" id="vesselName" placeholder="NEPTUNE..."
+                        class="w-full bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 text-sm font-bold border-0 focus:ring-2 focus:ring-toyota-red">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2">ETA</label>
+                    <input type="date" id="etaDate"
+                        class="w-full bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 text-sm font-bold border-0 focus:ring-2 focus:ring-toyota-red">
+                </div>
+                <!-- Additional Fields if needed: VCP, BL, ATR -->
+            </div>
+        </div>
+
+        <hr class="border-gray-100 dark:border-gray-800 my-8">
+
+        <!-- Step 2: Uploads -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Master File Upload -->
+            <div class="space-y-4">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="upload" class="w-4 h-4"></i> 2. Master Manifest
+                </h2>
+
+                <div class="relative group">
+                    <input type="file" id="masterFile" accept=".xlsx"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        onchange="handleFileSelect(this, 'masterStatus')">
+                    <div
+                        class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl p-8 text-center hover:border-toyota-red hover:bg-red-50 dark:hover:bg-red-900/10 transition bg-gray-50 dark:bg-gray-800/50">
+                        <div
+                            class="w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-toyota-red">
+                            <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+                        </div>
+                        <p class="font-bold text-gray-900 dark:text-white">Master.xlsx</p>
+                        <p id="masterStatus" class="text-xs text-gray-500 mt-1">Click or drag file here</p>
+                    </div>
+                </div>
+
+                <!-- Optional UA File -->
+                <div class="relative group opacity-80 hover:opacity-100 transition">
+                    <input type="file" id="uaFile" accept=".xlsx"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        onchange="handleFileSelect(this, 'uaStatus')">
+                    <div
+                        class="border border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-4 flex items-center gap-4 hover:border-gray-400 bg-white dark:bg-gray-800">
+                        <i data-lucide="file-plus" class="text-gray-400"></i>
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-sm font-bold text-gray-700 dark:text-gray-300">UA File (Optional)</p>
+                            <p id="uaStatus" class="text-xs text-gray-400 truncate">If separate UA manifest exists</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="processFiles()"
+                    class="w-full py-4 bg-toyota-red hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 transition flex items-center justify-center gap-2">
+                    <i data-lucide="play" class="w-5 h-5"></i> Generate Excel Files
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
+                <h3 class="font-bold text-gray-900 dark:text-white mb-4">Generated Files</h3>
+
+                <div id="resultsList" class="space-y-3">
+                    <div class="text-center py-10 text-gray-400 text-sm">
+                        Files will appear here after processing.
+                    </div>
+                </div>
+
+                <div id="loadingPulse" class="hidden space-y-3">
+                    <!-- Skeleton Loaders -->
+                    <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+                    <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse delay-75"></div>
+                    <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse delay-150"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    lucide.createIcons();
+
+    function handleFileSelect(input, labelId) {
+        if (input.files[0]) {
+            document.getElementById(labelId).textContent = input.files[0].name;
+            document.getElementById(labelId).classList.add('text-toyota-red');
+        }
+    }
+
+    async function processFiles() {
+        const master = document.getElementById('masterFile').files[0];
+        const ua = document.getElementById('uaFile').files[0];
+        const vessel = document.getElementById('vesselName').value;
+        const eta = document.getElementById('etaDate').value;
+
+        if (!master) {
+            alert("Please upload the Master file.");
+            return;
+        }
+
+        const list = document.getElementById('resultsList');
+        const loader = document.getElementById('loadingPulse');
+
+        list.classList.add('hidden');
+        loader.classList.remove('hidden');
+
+        try {
+            const formData = new FormData();
+            formData.append('master', master);
+            if (ua) formData.append('ua', ua);
+            formData.append('vessel', vessel);
+            formData.append('eta', eta);
+
+            const res = await fetch('/api/toyota/dvh-process', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            list.innerHTML = '';
+
+            if (data.results) {
+                data.results.forEach(file => {
+                    // Create Download Links
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700';
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                                <i data-lucide="file-check" class="w-4 h-4"></i>
+                            </div>
+                            <span class="font-medium text-sm text-gray-700 dark:text-gray-300">${file.name}</span>
+                        </div>
+                        <a href="${file.url}" download="${file.name}" class="text-blue-600 hover:underline text-sm font-bold">Download</a>
+                     `;
+                    list.appendChild(div);
+                });
+                lucide.createIcons();
+            } else if (data.error) {
+                list.innerHTML = `<div class="text-red-500 font-bold p-4 bg-red-50 rounded-xl">${data.error}</div>`;
+            }
+
+        } catch (e) {
+            console.error(e);
+            list.innerHTML = `<div class="text-red-500">Error processing request.</div>`;
+        } finally {
+            loader.classList.add('hidden');
+            list.classList.remove('hidden');
+        }
+    }
+
+    async function processDiz() {
+        const text = document.getElementById('dizInput').value;
+        if (!text.trim()) return;
+
+        try {
+            const res = await fetch('/api/toyota/dvh-diz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: text })
+            });
+            const data = await res.json();
+
+            if (data.download_url) {
+                window.location.href = data.download_url; // Download ZIP or similar (To be implemented in backend backend could return list of text files or json to allow client side generation, but let's assume backend zips or returns one by one. For simplicity, let's assume backend returns JSON with file contents)
+                // Actually, let's just make it return JSON with contents and we download nicely.
+                if (data.files) {
+                    data.files.forEach(f => {
+                        const blob = new Blob([f.content], { type: 'text/plain' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = f.filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                    });
+                    document.getElementById('dizModal').classList.add('hidden');
+                }
+            }
+        } catch (e) {
+            alert("Error processing DIZ");
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Generic Header -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{{ module_name }} Dashboard</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Operational Overview for {{ module_name }}</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-400 font-mono">{{ get_time() }}</span>
+        </div>
+    </div>
+
+    <!-- Modules Grid (Generic) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {% for sub in submodules %}
+        <a href="{{ sub.url }}"
+            class="group block p-6 bg-white dark:bg-white/5 rounded-3xl border border-gray-100 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:shadow-2xl hover:shadow-gray-900/5 transition-all relative overflow-hidden">
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-gray-500/0 to-gray-500/5 opacity-0 group-hover:opacity-100 transition-opacity">
+            </div>
+
+            <div
+                class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-gray-600 dark:text-gray-300 mb-4 shadow-sm group-hover:scale-110 transition-transform relative z-10">
+                <i class="fas fa-{{ sub.icon or 'folder' }} text-xl"></i>
+            </div>
+
+            <h3
+                class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors relative z-10">
+                {{ sub.name }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 relative z-10">Access module functionality and
+                tools.</p>
+
+            <div
+                class="flex items-center text-gray-600 dark:text-gray-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 relative z-10">
+                Open <i class="fas fa-arrow-right ml-2"></i>
+            </div>
+        </a>
+        {% endfor %}
+
+        <!-- Placeholder if empty -->
+        {% if not submodules %}
+        <div
+            class="col-span-full text-center py-12 bg-gray-50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
+            <p class="text-gray-400">No active submodules configured for {{ module_name }}.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

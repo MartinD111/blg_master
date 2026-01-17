@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="vw-announce-tool"
+    class="bg-transparent text-gray-900 dark:text-gray-100 min-h-screen flex flex-col selection:bg-primary selection:text-white">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        surface: { light: '#f2f4f7', dark: '#0b0b0b', card: '#ffffff', cardDark: '#1c1c1e' },
+                        primary: { DEFAULT: '#0050d5', dark: '#5c9dff' }
+                    }
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        #vw-announce-tool {
+            font-family: 'Inter', sans-serif;
+        }
+
+        #vw-announce-tool * {
+            transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, color 0.3s ease;
+        }
+
+        .drag-active {
+            border-color: #0050d5 !important;
+            background-color: rgba(0, 80, 213, 0.08) !important;
+            transform: scale(0.99);
+        }
+    </style>
+    <div class="max-w-5xl mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-4">Announcement Helper</h1>
+        <div id="drop-zone"
+            class="relative group overflow-hidden bg-surface-card dark:bg-surface-cardDark border-3 border-dashed border-gray-200 dark:border-gray-700 rounded-4xl p-16 text-center cursor-pointer hover:border-primary/50">
+            <input type="file" id="file-input" class="hidden" accept=".csv,.xlsx,.xls" />
+            <div class="flex flex-col items-center gap-4">
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-3xl">
+                    <i data-lucide="upload-cloud" class="w-10 h-10 text-primary"></i>
+                </div>
+                <h2 class="text-2xl font-bold" data-key="dropTitle">Drag & Drop Excel</h2>
+                <p class="text-gray-500" data-key="dropSubtitle">Supported: .xlsx, .csv</p>
+                <button onclick="document.getElementById('file-input').click()"
+                    class="mt-4 bg-primary text-white px-8 py-3.5 rounded-full font-semibold">
+                    <i data-lucide="folder-open" class="w-4 h-4"></i> Choose File
+                </button>
+            </div>
+        </div>
+        <div id="processing-status"
+            class="hidden mt-4 flex items-center justify-between p-4 bg-surface-card dark:bg-surface-cardDark rounded-3xl">
+            <span id="status-text" class="font-bold">Processing...</span>
+            <button id="save-btn" class="hidden bg-success text-white px-4 py-2 rounded"
+                onclick="saveAnnouncement()">Shrani</button>
+        </div>
+        <div id="preview-area" class="hidden mt-6"></div>
+        <div id="announceHistory" class="hidden mt-6">
+            <h2 class="text-xl font-bold mb-2">Announcement History</h2>
+            <div id="history-list" class="space-y-2"></div>
+        </div>
+    </div>
+    <script>
+        const TEXTS = { sl: { dropTitle: "Povleci in spusti Excel", dropSubtitle: "Podprto: .xlsx, .csv", saveBtn: "Shrani" }, en: { dropTitle: "Drag & Drop Excel", dropSubtitle: "Supported: .xlsx, .csv", saveBtn: "Save" } };
+        let currentLang = 'sl';
+        function applyLanguage() { document.querySelectorAll('[data-key]').forEach(el => { const k = el.getAttribute('data-key'); if (TEXTS[currentLang][k]) el.textContent = TEXTS[currentLang][k]; }); document.getElementById('save-btn').textContent = TEXTS[currentLang].saveBtn; }
+        function init() { lucide.createIcons(); applyLanguage(); const dz = document.getElementById('drop-zone'); const fi = document.getElementById('file-input'); dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-active'); }); dz.addEventListener('dragleave', () => dz.classList.remove('drag-active')); dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-active'); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); }); fi.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); }); }
+        function handleFile(file) { const reader = new FileReader(); reader.onload = e => { try { const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const json = XLSX.utils.sheet_to_json(ws, { header: 1 }); processData(json); } catch (err) { console.error(err); alert('Error reading file'); } }; reader.readAsArrayBuffer(file); }
+        function processData(rows) {
+            const statusText = document.getElementById('status-text');
+            const saveBtn = document.getElementById('save-btn');
+            const previewArea = document.getElementById('preview-area');
+
+            // In a real scenario, this would apply the transformation logic.
+            // For now, we simulate processing success.
+            const result = {
+                timestamp: new Date().toLocaleString('sl-SI'),
+                rowCount: rows.length,
+                id: 'ANN-' + Math.random().toString(36).substr(2, 9).toUpperCase()
+            };
+
+            window.currentAnnouncement = result;
+
+            statusText.textContent = `Obdelano: ${rows.length} vrstic`;
+            statusText.classList.add('text-green-600');
+            saveBtn.classList.remove('hidden');
+
+            previewArea.innerHTML = `
+                <div class="bg-white dark:bg-surface-cardDark p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-xl animate-fade-in">
+                    <h3 class="font-bold text-lg mb-4">Preview of Processed Data</h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="text-gray-500">ID:</div><div class="font-mono">${result.id}</div>
+                        <div class="text-gray-500">Rows:</div><div>${result.rowCount}</div>
+                        <div class="text-gray-500">Time:</div><div>${result.timestamp}</div>
+                    </div>
+                </div>
+            `;
+            previewArea.classList.remove('hidden');
+        }
+
+        function saveAnnouncement() {
+            if (!window.currentAnnouncement) return;
+
+            const history = JSON.parse(localStorage.getItem('vw_announce_history') || '[]');
+            history.unshift(window.currentAnnouncement);
+            localStorage.setItem('vw_announce_history', JSON.stringify(history));
+
+            // Show toast or feedback
+            const saveBtn = document.getElementById('save-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Shranjeno!';
+            saveBtn.classList.replace('bg-success', 'bg-gray-500');
+            saveBtn.disabled = true;
+
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.classList.replace('bg-gray-500', 'bg-success');
+                saveBtn.disabled = false;
+                saveBtn.classList.add('hidden');
+            }, 2000);
+
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const historyList = document.getElementById('history-list');
+            const historyContainer = document.getElementById('announceHistory');
+            const history = JSON.parse(localStorage.getItem('vw_announce_history') || '[]');
+
+            if (history.length === 0) {
+                historyContainer.classList.add('hidden');
+                return;
+            }
+
+            historyContainer.classList.remove('hidden');
+            historyList.innerHTML = history.map((item, index) => `
+                <div class="group relative bg-white dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/10 hover:border-primary/30 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-xs font-bold text-primary mb-1">#${history.length - index} – ${item.id}</div>
+                            <div class="text-sm font-medium">${item.timestamp}</div>
+                            <div class="text-xs text-gray-500 mt-1">${item.rowCount} rows processed</div>
+                        </div>
+                        <button onclick="deleteHistoryItem(${index})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function deleteHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('vw_announce_history') || '[]');
+            history.splice(index, 1);
+            localStorage.setItem('vw_announce_history', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function clearHistory() {
+            if (confirm('Izbrišem celotno zgodovino?')) {
+                localStorage.removeItem('vw_announce_history');
+                renderHistory();
+            }
+        }
+
+        window.addEventListener('load', () => {
+            init();
+            renderHistory();
+        });
+    </script>
+</div>
+{% endblock %}

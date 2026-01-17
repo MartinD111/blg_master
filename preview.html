@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLG OPERATIVA</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Sticky Glass Header -->
+    <header>
+        <div class="header-left">
+            <span>BLG OPERATIVA</span>
+        </div>
+
+        <div class="header-center">
+            <nav>
+                <ul class="nav-menu">
+
+                    <!-- 1. Trenutna situacija -->
+                    <li class="nav-item">
+                        <a href="preview_wip.html" class="nav-link">Trenutna situacija</a>
+                        <!-- Level 2 -->
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="preview_wip.html" class="dropdown-link">Stock
+                                    Comparison</a></li>
+                            <li class="dropdown-item"><a href="preview_wip.html" class="dropdown-link">Daily Flow</a>
+                            </li>
+                            <li class="dropdown-item"><a href="preview_wip.html" class="dropdown-link">Forecast</a></li>
+                            <li class="dropdown-item"><a href="preview_vw_stock.html" class="dropdown-link">VW Report
+                                    (Excel)</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 2. Toyota -->
+                    <li class="nav-item">
+                        <a href="preview_wip.html" class="nav-link">Toyota</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Ladje (Ships)</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Current Situation</a>
+                                    </li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Schedules</a></li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Import (DVH Helper)</a>
+                                    </li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Export</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Carinjenje</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Toyota Customs
+                                            Helper</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Vagoni</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Priprava naklada</a>
+                                    </li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Vagonski naklad</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Kamioni</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item">{% raw %}<a href="{{ url_for('vw_announce') }}"
+                                            class="dropdown-link">Announcement Helper</a>{% endraw %}
+                                    </li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Ladijski razporedi</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item">
+                                <a href="#" class="dropdown-link">Tramak</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 3. Volkswagen -->
+                    <li class="nav-item">
+                        <a href="preview_wip.html" class="nav-link">Volkswagen</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Ladje</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Import</a></li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Schedules</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Carinjenje</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">1 TON Customs Helper</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">DVH Helper</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="{{ url_for('vw_diz') }}"
+                                            class="dropdown-link">DIZ Splitter</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Stock</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="{{ url_for('vw_stock') }}"
+                                            class="dropdown-link">Reporting & Sync</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Kamioni</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="{{ url_for('vw_verify') }}"
+                                            class="dropdown-link">Overview</a></li>
+                                    <li class="dropdown-item"><a href="{{ url_for('vw_announce') }}"
+                                            class="dropdown-link">Announcement Helper</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 4. Others -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Others</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Docs</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Letter of Protest</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 5. e-CMR Manager -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">e-CMR Manager</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">All-in-One Tool</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Search & History</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 6. Vagoni (General) -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Vagoni</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Sledilnik</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Map Location</a></li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Wag List</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Railway Agency</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Status & Plan</a></li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">eTL Exporter</a></li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Celje Wagon Status</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 7. Statistika -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Statistika</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">General Stats</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Global Data
+                                            Connection</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 8. Fakture -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Fakture</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Billing</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Auto-invoice
+                                            generator</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 9. Produktivnost (Admin) -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" style="color: #ff9999;">Produktivnost</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Management</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">User Productivity</a>
+                                    </li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Variable Settings</a>
+                                    </li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Responsibility
+                                            Assignment</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="glass-input" placeholder="Global search...">
+            </div>
+
+            <a href="preview_profile.html" class="user-profile" style="text-decoration:none; color:inherit;">
+                <div class="avatar-circle">
+                    A
+                </div>
+                <span>Admin</span>
+            </a>
+            <a href="#" style="color:white; opacity:0.7; text-decoration:none;"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="content-grid">
+            <div class="card glass-panel">
+                <div class="card-header">
+                    System Stock
+                </div>
+                <div class="card-body">
+                    <h2>12,450</h2>
+                </div>
+            </div>
+
+            <div class="card glass-panel">
+                <div class="card-header">
+                    Dispatched Today
+                </div>
+                <div class="card-body">
+                    <h2>840</h2>
+                </div>
+            </div>
+
+            <div class="card glass-panel">
+                <div class="card-header">
+                    Loading Plan (Wagons)
+                </div>
+                <div class="card-body">
+                    <h2>45 / 50</h2>
+                </div>
+            </div>
+
+            <div class="card glass-panel">
+                <div class="card-header">
+                    Pending Customs
+                </div>
+                <div class="card-body">
+                    <h2 style="color: #ffcc00;">12</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel" style="margin-top: 20px; padding: 20px; min-height: 400px;">
+            <div class="card-header">Daily Activity Flow</div>
+            <div
+                style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; opacity: 0.5;">
+                <!-- Placeholder for chart -->
+                <i class="fas fa-chart-area" style="font-size: 5rem;"></i>
+                <span style="margin-left: 10px;">Chart Visualization Placeholder</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - BLG OPERATIVA</title>
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lucide for consistent icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="static/js/main.js"></script>
+</head>
+
+<body>
+    <!-- Site Header (Consistent with Main Page) -->
+    <header>
+        <div class="header-left">
+            <a href="preview.html"
+                style="text-decoration:none; color:var(--text-main); font-weight:700; font-size:1.1rem; letter-spacing:0.5px;">BLG
+                OPERATIVA</a>
+        </div>
+
+        <div class="header-center">
+            <nav>
+                <ul class="nav-menu">
+                    <!-- 1. Trenutna situacija (Flattened) -->
+                    <li class="nav-item">
+                        <a href="preview_wip.html" class="nav-link">Trenutna situacija</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="preview_wip.html" class="dropdown-link">Stock
+                                    Comparison</a></li>
+                            <li class="dropdown-item"><a href="preview_wip.html" class="dropdown-link">Daily Flow</a>
+                            </li>
+                            <li class="dropdown-item"><a href="preview_wip.html" class="dropdown-link">Forecast</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 2. Toyota -->
+                    <li class="nav-item">
+                        <a href="preview_wip.html" class="nav-link">Toyota</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="preview_t2l.html" class="dropdown-link">T2L -
+                                    ATT.Lista</a></li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Ladje (Ships)</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Current Situation</a>
+                                    </li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Schedules</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 3. Volkswagen -->
+                    <li class="nav-item">
+                        <a href="preview_wip.html" class="nav-link">Volkswagen</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="preview_t2l.html" class="dropdown-link">T2L -
+                                    ATT.Lista</a></li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Ladje</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Import</a></li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Schedules</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">Stock</a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="preview_vw_stock.html"
+                                            class="dropdown-link">Current situation (Excel)</a></li>
+                                    <li class="dropdown-item"><a href="preview_vw_stock.html"
+                                            class="dropdown-link">Reporting & Sync</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- 4. Others -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Others</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-item"><a href="#" class="dropdown-link">Docs</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- 5. e-CMR Manager -->
+                    <li class="nav-item"><a href="#" class="nav-link">e-CMR Manager</a></li>
+
+                    <!-- 6. Vagoni -->
+                    <li class="nav-item"><a href="#" class="nav-link">Vagoni</a></li>
+
+                    <!-- 7. Statistika -->
+                    <li class="nav-item"><a href="#" class="nav-link">Statistika</a></li>
+
+                    <!-- 8. Fakture -->
+                    <li class="nav-item"><a href="#" class="nav-link">Fakture</a></li>
+
+                    <!-- 9. Produktivnost -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" style="color: #ff9999;">Produktivnost</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="glass-input" placeholder="Global search...">
+            </div>
+
+            <a href="preview_profile.html" class="user-profile" style="text-decoration:none; color:inherit;">
+                <div class="avatar-circle">A</div>
+                <span>Admin</span>
+            </a>
+            <a href="#" style="color:var(--text-muted); opacity:0.7; text-decoration:none; margin-left:10px;"><i
+                    class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="glass-panel" style="padding: 40px; max-width: 800px; margin: 40px auto; position: relative;">
+
+            <!-- User Info Section -->
+            <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 40px;">
+                <div id="big-avatar" onclick="openAvatarModal()"
+                    style="width: 100px; height: 100px; border-radius: 50%; background: var(--accent-color); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; position: relative; overflow: hidden;">
+                    <span id="current-avatar-icon">A</span>
+                    <div class="avatar-overlay"
+                        style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
+                        <i class="fas fa-camera" style="color: white; font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 style="margin: 0; font-size: 2.5rem;">Admin User</h1>
+                    <p style="margin: 5px 0 0; opacity: 0.7; font-size: 1.1rem;" data-i18n="role">Role: Administrator
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-grid" style="margin-bottom: 40px;">
+                <div class="card glass-panel">
+                    <div class="card-header" data-i18n="productivity">Productivity</div>
+                    <div class="card-body">
+                        <h2>92%</h2>
+                    </div>
+                </div>
+                <div class="card glass-panel">
+                    <div class="card-header" data-i18n="workload">Daily Work Load</div>
+                    <div class="card-body">
+                        <h2 style="color: #ffcc00;">High</h2>
+                    </div>
+                </div>
+                <div class="card glass-panel">
+                    <div class="card-header" data-i18n="project">Top Project</div>
+                    <div class="card-body">
+                        <h4 style="font-size: 1.2rem;">Volkswagen</h4>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 30px 0;">
+
+            <h3 data-i18n="settings">Settings</h3>
+
+            <div style="display: flex; gap: 40px; flex-wrap: wrap;">
+                <div>
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;"
+                        data-i18n="theme">Theme</label>
+                    <button class="settings-btn" onclick="toggleTheme()">
+                        <i class="fas fa-moon"></i> <span id="theme-label">Dark / Light</span>
+                    </button>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;"
+                        data-i18n="language">Language</label>
+                    <button class="settings-btn" onclick="toggleLanguage()">
+                        <i class="fas fa-globe"></i> <span id="lang-label">English / Slovenian</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar Selection Modal (Updated for Light Mode visibility + Save) -->
+    <div id="avatar-modal" class="hidden-modal">
+        <div class="glass-panel modal-content">
+            <h2 style="margin-top: 0; margin-bottom: 20px;" class="modal-title">Choose Avatar</h2>
+
+            <div class="avatar-grid">
+                <!-- 10 Animal Icons -->
+                <div class="avatar-option" onclick="selectIcon('fa-cat', this)"><i class="fas fa-cat"></i></div>
+                <div class="avatar-option" onclick="selectIcon('fa-dog', this)"><i class="fas fa-dog"></i></div>
+                <div class="avatar-option" onclick="selectIcon('fa-crow', this)"><i class="fas fa-crow"></i></div>
+                <div class="avatar-option" onclick="selectIcon('fa-dragon', this)"><i class="fas fa-dragon"></i></div>
+                <div class="avatar-option" onclick="selectIcon('fa-fish', this)"><i class="fas fa-fish"></i></div>
+
+                <div class="avatar-option" onclick="selectIcon('fa-hippo', this)"><i class="fas fa-hippo"></i></div>
+                <div class="avatar-option" onclick="selectIcon('fa-otter', this)"><i class="fas fa-otter"></i></div>
+                <div class="avatar-option" onclick="selectIcon('fa-spider', this)"><i class="fas fa-spider"></i></div>
+                <div class="avatar-option" onclick="selectIcon('fa-dove', this)"><i class="fas fa-dove"></i></div>
+                <div class="avatar-option" onclick="selectIcon('fa-horse', this)"><i class="fas fa-horse"></i></div>
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
+                <button onclick="closeAvatarModal()" class="action-btn cancel-btn">Cancel</button>
+                <button onclick="saveAvatar()" class="action-btn save-btn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .hidden-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            /* Use glass bg variable */
+            padding: 30px;
+            border-radius: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            color: var(--text-main);
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .avatar-option.selected {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        .action-btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s;
+        }
+
+        .save-btn {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .cancel-btn {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-main);
+        }
+    </style>
+
+    <script>
+        let selectedIconClass = null;
+
+        function openAvatarModal() {
+            document.getElementById('avatar-modal').style.display = 'flex';
+        }
+
+        function closeAvatarModal() {
+            document.getElementById('avatar-modal').style.display = 'none';
+            // Clear selection visual
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            selectedIconClass = null;
+        }
+
+        function selectIcon(iconClass, element) {
+            selectedIconClass = iconClass;
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        function saveAvatar() {
+            if (!selectedIconClass) {
+                closeAvatarModal();
+                return;
+            }
+
+            // Update Big Avatar
+            const container = document.getElementById('big-avatar');
+            const iconSpan = document.getElementById('current-avatar-icon');
+            iconSpan.innerHTML = `<i class="fas ${selectedIconClass}"></i>`;
+
+            // Also update Header Avatar for consistency
+            document.getElementById('header-avatar').innerHTML = `<i class="fas ${selectedIconClass}" style="font-size: 0.8rem;"></i>`;
+
+            closeAvatarModal();
+        }
+
+        // Close modal on outside click
+        document.getElementById('avatar-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'avatar-modal') closeAvatarModal();
+        });
+    </script>
+</body>
+
+</html>

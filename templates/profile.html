@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-content">
+    <div class="glass-panel" style="padding: 40px; max-width: 800px; margin: 40px auto; position: relative;">
+
+        <!-- User Info Section -->
+        <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 40px;">
+            <div id="big-avatar" onclick="openAvatarModal()"
+                style="width: 100px; height: 100px; border-radius: 50%; background: var(--accent-color); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; position: relative; overflow: hidden;">
+                <span id="current-avatar-icon">
+                    {% if user.avatar %}
+                    {{ user.avatar | safe }}
+                    {% else %}
+                    {{ user.initials }}
+                    {% endif %}
+                </span>
+                <div class="avatar-overlay"
+                    style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
+                    <i class="fas fa-camera" style="color: white; font-size: 1.5rem;"></i>
+                </div>
+            </div>
+            <div>
+                <h1 style="margin: 0; font-size: 2.5rem;">{{ user.name }} {{ user.surname }}</h1>
+                <p style="margin: 5px 0 0; opacity: 0.7; font-size: 1.1rem;" data-i18n="role">Role: {{ user.role }}
+                </p>
+            </div>
+        </div>
+
+        <div class="content-grid" style="margin-bottom: 40px;">
+            <div class="card glass-panel">
+                <div class="card-header" data-i18n="productivity">Productivity</div>
+                <div class="card-body">
+                    <h2>{{ user.productivity|default('85') }}%</h2>
+                </div>
+            </div>
+            <div class="card glass-panel">
+                <div class="card-header" data-i18n="workload">Daily Work Load</div>
+                <div class="card-body">
+                    <h2 style="color: #ffcc00;">{{ user.workload|default('Medium') }}</h2>
+                </div>
+            </div>
+            <div class="card glass-panel">
+                <div class="card-header" data-i18n="project">Top Project</div>
+                <div class="card-body">
+                    <h4 style="font-size: 1.2rem;">Volkswagen</h4>
+                </div>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 30px 0;">
+
+        <h3 data-i18n="settings">Settings</h3>
+
+        <div style="display: flex; gap: 40px; flex-wrap: wrap;">
+            <div>
+                <label style="display: block; margin-bottom: 10px; font-weight: 600;" data-i18n="theme">Theme</label>
+                <button class="settings-btn" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i> <span id="theme-label">Dark / Light</span>
+                </button>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 10px; font-weight: 600;"
+                    data-i18n="language">Language</label>
+                <button class="settings-btn" onclick="toggleLanguage()">
+                    <i class="fas fa-globe"></i> <span id="lang-label">English / Slovenian</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Avatar Selection Modal -->
+<div id="avatar-modal" class="hidden-modal">
+    <div class="glass-panel modal-content">
+        <h2 style="margin-top: 0; margin-bottom: 20px;" class="modal-title">Choose Avatar</h2>
+
+        <div class="avatar-grid">
+            <!-- 10 Animal Icons -->
+            <div class="avatar-option" onclick="selectIcon('fa-cat', this)"><i class="fas fa-cat"></i></div>
+            <div class="avatar-option" onclick="selectIcon('fa-dog', this)"><i class="fas fa-dog"></i></div>
+            <div class="avatar-option" onclick="selectIcon('fa-crow', this)"><i class="fas fa-crow"></i></div>
+            <div class="avatar-option" onclick="selectIcon('fa-dragon', this)"><i class="fas fa-dragon"></i></div>
+            <div class="avatar-option" onclick="selectIcon('fa-fish', this)"><i class="fas fa-fish"></i></div>
+
+            <div class="avatar-option" onclick="selectIcon('fa-hippo', this)"><i class="fas fa-hippo"></i></div>
+            <div class="avatar-option" onclick="selectIcon('fa-otter', this)"><i class="fas fa-otter"></i></div>
+            <div class="avatar-option" onclick="selectIcon('fa-spider', this)"><i class="fas fa-spider"></i></div>
+            <div class="avatar-option" onclick="selectIcon('fa-dove', this)"><i class="fas fa-dove"></i></div>
+            <div class="avatar-option" onclick="selectIcon('fa-horse', this)"><i class="fas fa-horse"></i></div>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
+            <button onclick="closeAvatarModal()" class="action-btn cancel-btn">Cancel</button>
+            <button onclick="saveAvatar()" class="action-btn save-btn">Save</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hidden-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+        background: var(--glass-bg);
+        /* Use glass bg variable */
+        padding: 30px;
+        border-radius: 40px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        color: var(--text-main);
+    }
+
+    .avatar-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .avatar-option {
+        /* Basic styles for option wrapper if needed, logic is mostly in JS/CSS interactions */
+        padding: 10px;
+        border-radius: 50%;
+        transition: all 0.2s;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar-option i {
+        font-size: 1.5rem;
+    }
+
+    .avatar-option:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .avatar-option.selected {
+        background: var(--accent-color);
+        color: white;
+        box-shadow: 0 0 15px var(--accent-color);
+    }
+
+    .action-btn {
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        transition: transform 0.2s;
+    }
+
+    .save-btn {
+        background: var(--accent-color);
+        color: white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .cancel-btn {
+        background: transparent;
+        border: 1px solid var(--text-muted);
+        color: var(--text-main);
+    }
+</style>
+
+<script>
+    let selectedIconClass = null;
+
+    function openAvatarModal() {
+        document.getElementById('avatar-modal').style.display = 'flex';
+    }
+
+    function closeAvatarModal() {
+        document.getElementById('avatar-modal').style.display = 'none';
+        // Clear selection visual
+        document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+        selectedIconClass = null;
+    }
+
+    function selectIcon(iconClass, element) {
+        selectedIconClass = iconClass;
+        document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+    }
+
+    function saveAvatar() {
+        if (!selectedIconClass) {
+            closeAvatarModal();
+            return;
+        }
+
+        const newAvatarHtml = `<i class="fas ${selectedIconClass}"></i>`;
+
+        // Send to server
+        fetch('{{ url_for("update_avatar") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ avatar: newAvatarHtml })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update Big Avatar
+                    const iconSpan = document.getElementById('current-avatar-icon');
+                    iconSpan.innerHTML = newAvatarHtml;
+
+                    // Update Header Avatar as well (assuming it has ID 'header-avatar-icon')
+                    // Note: base.html doesn't have an ID on the avatar container usually, checking...
+                    // The base.html snippet showed <div class="avatar-circle">...</div>, no specific ID for js update.
+                    // We'll try to find it by class or reload the page. Since the user complained about "navigation" not updating, 
+                    // correct session storage is key. But immediate feedback is nice.
+
+                    const headerAvatar = document.querySelector('.header-right .avatar-circle');
+                    if (headerAvatar) {
+                        headerAvatar.innerHTML = newAvatarHtml;
+                    }
+                } else {
+                    alert('Failed to save avatar.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error saving avatar.');
+            });
+
+        closeAvatarModal();
+    }
+
+    // Close modal on outside click
+    document.getElementById('avatar-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'avatar-modal') closeAvatarModal();
+    });
+</script>
+{% endblock %}
