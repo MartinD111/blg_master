@@ -1,149 +1,144 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="main-content">
-
-    <!-- Dashboard Header -->
-    <div class="glass-panel"
-        style="margin-bottom: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h1 class="text-glow" style="margin: 0; font-size: 1.8rem; color: #3498db;">Volkswagen Dashboard</h1>
-            <p style="margin: 5px 0 0 0; color: var(--text-muted);">Truck Dispatch & Logistics Overview</p>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <span style="color: var(--text-muted); font-size: 0.9rem;">{{ get_time() }}</span>
-            <button onclick="openVWSettings()" class="btn glass-btn"
-                style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); font-weight: 600; font-size: 0.9rem;">
-                <i class="fas fa-plus-minus"></i> Add/Remove
-            </button>
-            <button onclick="openVWRearrange()" class="btn glass-btn"
-                style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3); font-weight: 600; font-size: 0.9rem;">
-                <i class="fas fa-arrows-alt"></i> Re-arrange
-            </button>
-        </div>
+<!-- Dashboard Header -->
+<div class="glass-panel"
+    style="margin-bottom: 15px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h1 class="text-glow" style="margin: 0; font-size: 1.8rem; color: #3498db;">Volkswagen Dashboard</h1>
+        <p style="margin: 5px 0 0 0; color: var(--text-muted);">Truck Dispatch & Logistics Overview</p>
     </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">{{ get_time() }}</span>
+        <button onclick="openVWSettings()" class="btn glass-btn"
+            style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); font-weight: 600; font-size: 0.9rem;">
+            <i class="fas fa-plus-minus"></i> Add/Remove
+        </button>
+        <button onclick="openVWRearrange()" class="btn glass-btn"
+            style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3); font-weight: 600; font-size: 0.9rem;">
+            <i class="fas fa-arrows-alt"></i> Re-arrange
+        </button>
+    </div>
+</div>
 
-    <!-- Live Operations Stats -->
-    <div id="vwGrid" class="content-grid"
-        style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); margin-bottom: 30px;">
+<!-- Live Operations Stats -->
+<div id="vwGrid" class="content-grid"
+    style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); margin-bottom: 30px;">
 
-        <!-- Dispatch Stats (Trucks) -->
-        <div class="card glass-panel" data-widget="dispatch_stats"
-            style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.3) 0%, rgba(41, 128, 185, 0.2) 100%); border-color: rgba(52, 152, 219, 0.3);">
-            <div class="card-header" style="color: #3498db;">
-                <i class="fas fa-truck-moving"></i> Trucks Dispatched (Today)
+    <!-- Dispatch Stats (Trucks) -->
+    <div class="card glass-panel" data-widget="dispatch_stats"
+        style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.3) 0%, rgba(41, 128, 185, 0.2) 100%); border-color: rgba(52, 152, 219, 0.3);">
+        <div class="card-header" style="color: #3498db;">
+            <i class="fas fa-truck-moving"></i> Trucks Dispatched (Today)
+        </div>
+        <div class="card-body" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+                <h2 class="text-glow" style="font-size: 3rem; margin: 0; color: #fff;">42</h2>
+                <span style="color: var(--text-muted); font-size: 1.1rem;">/ 60 Planned</span>
             </div>
-            <div class="card-body" style="flex-direction: column; align-items: flex-start; gap: 15px;">
-                <div style="display: flex; align-items: baseline; gap: 10px;">
-                    <h2 class="text-glow" style="font-size: 3rem; margin: 0; color: #fff;">42</h2>
-                    <span style="color: var(--text-muted); font-size: 1.1rem;">/ 60 Planned</span>
-                </div>
+            <div style="width: 100%; background: rgba(0,0,0,0.3); height: 8px; border-radius: 4px; overflow: hidden;">
                 <div
-                    style="width: 100%; background: rgba(0,0,0,0.3); height: 8px; border-radius: 4px; overflow: hidden;">
-                    <div
-                        style="width: 70%; height: 100%; background: linear-gradient(90deg, #3498db, #1abc9c); border-radius: 4px;">
-                    </div>
+                    style="width: 70%; height: 100%; background: linear-gradient(90deg, #3498db, #1abc9c); border-radius: 4px;">
                 </div>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">70% Completion Rate</span>
             </div>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">70% Completion Rate</span>
         </div>
-
-        <!-- Yesterday's Arrivals -->
-        <div class="card glass-panel" data-widget="arrivals">
-            <div class="card-header">
-                <i class="fas fa-history"></i> Yesterday's Arrivals
-            </div>
-            <div class="card-body"
-                style="flex-direction: column; align-items: flex-start; gap: 10px; padding-top: 15px;">
-                <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem;">Trucks arrived at compound</p>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div
-                        style="width: 55px; height: 55px; border-radius: 16px; background: rgba(46, 204, 113, 0.2); display: flex; align-items: center; justify-content: center; color: #2ecc71; font-size: 1.5rem; font-weight: bold;">
-                        85</div>
-                    <div>
-                        <div style="font-weight: 600; color: var(--text-main);">Total Trucks</div>
-                        <div style="font-size: 0.8rem; color: #2ecc71;">+12% vs Avg</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ship Dispatch Plan -->
-        <div class="card glass-panel" data-widget="ship_plan">
-            <div class="card-header">
-                <i class="fas fa-ship" style="color: #3498db;"></i> Ship Dispatch Plan
-            </div>
-            <div class="card-body" style="flex-direction: column; align-items: stretch; gap: 12px; padding-top: 15px;">
-                <div class="glass-panel"
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.03);">
-                    <div>
-                        <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">RCC PASSION</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">ETA: Today 14:00</div>
-                    </div>
-                    <span
-                        style="padding: 4px 12px; background: rgba(52, 152, 219, 0.2); color: #3498db; border-radius: 20px; font-size: 0.7rem; font-weight: 600;">In
-                        Port</span>
-                </div>
-                <div class="glass-panel"
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.03);">
-                    <div>
-                        <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">GLOVIS STAR</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">ETA: 19.01. 08:00</div>
-                    </div>
-                    <span
-                        style="padding: 4px 12px; background: rgba(255,255,255,0.1); color: var(--text-muted); border-radius: 20px; font-size: 0.7rem; font-weight: 600;">Planned</span>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <!-- Modules Grid -->
-    <h2 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--text-muted);">Volkswagen Modules</h2>
-    <div class="content-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
-
-        <a href="{{ url_for('vw_stock') }}" class="card glass-panel"
-            style="text-decoration: none; color: inherit; transition: all 0.3s;">
-            <div
-                style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #3498db, #2980b9); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);">
-                <i class="fas fa-cubes" style="color: white; font-size: 1.2rem;"></i>
+    <!-- Yesterday's Arrivals -->
+    <div class="card glass-panel" data-widget="arrivals">
+        <div class="card-header">
+            <i class="fas fa-history"></i> Yesterday's Arrivals
+        </div>
+        <div class="card-body" style="flex-direction: column; align-items: flex-start; gap: 10px; padding-top: 15px;">
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem;">Trucks arrived at compound</p>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div
+                    style="width: 55px; height: 55px; border-radius: 16px; background: rgba(46, 204, 113, 0.2); display: flex; align-items: center; justify-content: center; color: #2ecc71; font-size: 1.5rem; font-weight: bold;">
+                    85</div>
+                <div>
+                    <div style="font-weight: 600; color: var(--text-main);">Total Trucks</div>
+                    <div style="font-size: 0.8rem; color: #2ecc71;">+12% vs Avg</div>
+                </div>
             </div>
-            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Stock Report</h3>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Inventory management and reporting.</p>
-        </a>
-
-        <a href="{{ url_for('vw_carinjenje') }}" class="card glass-panel"
-            style="text-decoration: none; color: inherit; transition: all 0.3s;">
-            <div
-                style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #9b59b6, #8e44ad); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);">
-                <i class="fas fa-file-contract" style="color: white; font-size: 1.2rem;"></i>
-            </div>
-            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Carinjenje Hub</h3>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">A.TR, HS Codes, T2L, Customs tools.</p>
-        </a>
-
-        <a href="{{ url_for('vw_kamioni_hub') }}" class="card glass-panel"
-            style="text-decoration: none; color: inherit; transition: all 0.3s;">
-            <div
-                style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #2ecc71, #27ae60); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);">
-                <i class="fas fa-truck" style="color: white; font-size: 1.2rem;"></i>
-            </div>
-            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Kamioni (Trucks)</h3>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Announcements, Arrivals, Inspections.
-            </p>
-        </a>
-
-        <a href="{{ url_for('vw_dvh_helper') }}" class="card glass-panel"
-            style="text-decoration: none; color: inherit; transition: all 0.3s;">
-            <div
-                style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #e67e22, #d35400); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);">
-                <i class="fas fa-tools" style="color: white; font-size: 1.2rem;"></i>
-            </div>
-            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">DVH Helper</h3>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Data Verification Helper tools.</p>
-        </a>
-
+        </div>
     </div>
+
+    <!-- Ship Dispatch Plan -->
+    <div class="card glass-panel" data-widget="ship_plan">
+        <div class="card-header">
+            <i class="fas fa-ship" style="color: #3498db;"></i> Ship Dispatch Plan
+        </div>
+        <div class="card-body" style="flex-direction: column; align-items: stretch; gap: 12px; padding-top: 15px;">
+            <div class="glass-panel"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.03);">
+                <div>
+                    <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">RCC PASSION</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">ETA: Today 14:00</div>
+                </div>
+                <span
+                    style="padding: 4px 12px; background: rgba(52, 152, 219, 0.2); color: #3498db; border-radius: 20px; font-size: 0.7rem; font-weight: 600;">In
+                    Port</span>
+            </div>
+            <div class="glass-panel"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.03);">
+                <div>
+                    <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">GLOVIS STAR</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">ETA: 19.01. 08:00</div>
+                </div>
+                <span
+                    style="padding: 4px 12px; background: rgba(255,255,255,0.1); color: var(--text-muted); border-radius: 20px; font-size: 0.7rem; font-weight: 600;">Planned</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modules Grid -->
+<h2 style="margin: 15px 0 12px 0; font-size: 1.1rem; color: var(--text-muted);">Volkswagen Modules</h2>
+<div class="content-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+
+    <a href="{{ url_for('vw_stock') }}" class="card glass-panel"
+        style="text-decoration: none; color: inherit; transition: all 0.3s;">
+        <div
+            style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #3498db, #2980b9); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);">
+            <i class="fas fa-cubes" style="color: white; font-size: 1.2rem;"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Stock Report</h3>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Inventory management and reporting.</p>
+    </a>
+
+    <a href="{{ url_for('vw_carinjenje') }}" class="card glass-panel"
+        style="text-decoration: none; color: inherit; transition: all 0.3s;">
+        <div
+            style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #9b59b6, #8e44ad); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);">
+            <i class="fas fa-file-contract" style="color: white; font-size: 1.2rem;"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Carinjenje Hub</h3>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">A.TR, HS Codes, T2L, Customs tools.</p>
+    </a>
+
+    <a href="{{ url_for('vw_kamioni_hub') }}" class="card glass-panel"
+        style="text-decoration: none; color: inherit; transition: all 0.3s;">
+        <div
+            style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #2ecc71, #27ae60); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);">
+            <i class="fas fa-truck" style="color: white; font-size: 1.2rem;"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Kamioni (Trucks)</h3>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Announcements, Arrivals, Inspections.
+        </p>
+    </a>
+
+    <a href="{{ url_for('vw_dvh_helper') }}" class="card glass-panel"
+        style="text-decoration: none; color: inherit; transition: all 0.3s;">
+        <div
+            style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #e67e22, #d35400); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);">
+            <i class="fas fa-tools" style="color: white; font-size: 1.2rem;"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">DVH Helper</h3>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Data Verification Helper tools.</p>
+    </a>
+
 </div>
 
 <!-- VW Settings Modal -->

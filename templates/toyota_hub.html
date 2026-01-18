@@ -1,130 +1,126 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="main-content">
-
-    <!-- Dashboard Header -->
-    <div class="glass-panel"
-        style="margin-bottom: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h1 class="text-glow" style="margin: 0; font-size: 1.8rem; color: #e74c3c;">Toyota Dashboard</h1>
-            <p style="margin: 5px 0 0 0; color: var(--text-muted);">Daily Operations Overview</p>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <span style="color: var(--text-muted); font-size: 0.9rem;">{{ get_time() }}</span>
-            <button onclick="openToyotaSettings()" class="btn glass-btn"
-                style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); font-weight: 600; font-size: 0.9rem;">
-                <i class="fas fa-plus-minus"></i> Add/Remove
-            </button>
-            <button onclick="openToyotaRearrange()" class="btn glass-btn"
-                style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3); font-weight: 600; font-size: 0.9rem;">
-                <i class="fas fa-arrows-alt"></i> Re-arrange
-            </button>
-        </div>
+<!-- Dashboard Header -->
+<div class="glass-panel"
+    style="margin-bottom: 15px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h1 class="text-glow" style="margin: 0; font-size: 1.8rem; color: #e74c3c;">Toyota Dashboard</h1>
+        <p style="margin: 5px 0 0 0; color: var(--text-muted);">Daily Operations Overview</p>
     </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">{{ get_time() }}</span>
+        <button onclick="openToyotaSettings()" class="btn glass-btn"
+            style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); font-weight: 600; font-size: 0.9rem;">
+            <i class="fas fa-plus-minus"></i> Add/Remove
+        </button>
+        <button onclick="openToyotaRearrange()" class="btn glass-btn"
+            style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3); font-weight: 600; font-size: 0.9rem;">
+            <i class="fas fa-arrows-alt"></i> Re-arrange
+        </button>
+    </div>
+</div>
 
-    <!-- Live Operations Stats -->
-    <div id="toyotaGrid" class="content-grid"
-        style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); margin-bottom: 30px;">
+<!-- Live Operations Stats -->
+<div id="toyotaGrid" class="content-grid"
+    style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); margin-bottom: 30px;">
 
-        <!-- Today's Loading -->
-        <div class="card glass-panel" data-widget="loading_stats"
-            style="background: linear-gradient(135deg, rgba(231, 76, 60, 0.3) 0%, rgba(192, 57, 43, 0.2) 100%); border-color: rgba(231, 76, 60, 0.3);">
-            <div class="card-header" style="color: #e74c3c;">
-                <i class="fas fa-truck-loading"></i> Vehicles Loading Today
+    <!-- Today's Loading -->
+    <div class="card glass-panel" data-widget="loading_stats"
+        style="background: linear-gradient(135deg, rgba(231, 76, 60, 0.3) 0%, rgba(192, 57, 43, 0.2) 100%); border-color: rgba(231, 76, 60, 0.3);">
+        <div class="card-header" style="color: #e74c3c;">
+            <i class="fas fa-truck-loading"></i> Vehicles Loading Today
+        </div>
+        <div class="card-body" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+                <h2 class="text-glow" style="font-size: 3rem; margin: 0; color: #fff;">124</h2>
+                <span style="color: var(--text-muted); font-size: 1.1rem;">/ 150 Planned</span>
             </div>
-            <div class="card-body" style="flex-direction: column; align-items: flex-start; gap: 15px;">
-                <div style="display: flex; align-items: baseline; gap: 10px;">
-                    <h2 class="text-glow" style="font-size: 3rem; margin: 0; color: #fff;">124</h2>
-                    <span style="color: var(--text-muted); font-size: 1.1rem;">/ 150 Planned</span>
-                </div>
+            <div style="width: 100%; background: rgba(0,0,0,0.3); height: 8px; border-radius: 4px; overflow: hidden;">
                 <div
-                    style="width: 100%; background: rgba(0,0,0,0.3); height: 8px; border-radius: 4px; overflow: hidden;">
+                    style="width: 82%; height: 100%; background: linear-gradient(90deg, #e74c3c, #f39c12); border-radius: 4px;">
+                </div>
+            </div>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">82% Completion Rate</span>
+        </div>
+    </div>
+
+    <!-- Train Plan -->
+    <div class="card glass-panel" data-widget="train_plan">
+        <div class="card-header">
+            <i class="fas fa-train"></i> Train Plan
+        </div>
+        <div class="card-body" style="flex-direction: column; align-items: stretch; gap: 12px; padding-top: 15px;">
+            <div class="glass-panel"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.03);">
+                <div style="display: flex; align-items: center; gap: 12px;">
                     <div
-                        style="width: 82%; height: 100%; background: linear-gradient(90deg, #e74c3c, #f39c12); border-radius: 4px;">
+                        style="width: 35px; height: 35px; border-radius: 50%; background: rgba(231, 76, 60, 0.2); display: flex; align-items: center; justify-content: center; color: #e74c3c; font-weight: bold;">
+                        1</div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-main);">Train #9021</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Dest: Vienna</div>
                     </div>
                 </div>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">82% Completion Rate</span>
+                <span
+                    style="padding: 4px 12px; background: rgba(46, 204, 113, 0.2); color: #2ecc71; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Ready</span>
+            </div>
+            <div class="glass-panel"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.03);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div
+                        style="width: 35px; height: 35px; border-radius: 50%; background: rgba(231, 76, 60, 0.2); display: flex; align-items: center; justify-content: center; color: #e74c3c; font-weight: bold;">
+                        2</div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-main);">Train #4412</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Dest: Munich</div>
+                    </div>
+                </div>
+                <span
+                    style="padding: 4px 12px; background: rgba(241, 196, 15, 0.2); color: #f1c40f; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Loading</span>
             </div>
         </div>
+    </div>
 
-        <!-- Train Plan -->
-        <div class="card glass-panel" data-widget="train_plan">
-            <div class="card-header">
-                <i class="fas fa-train"></i> Train Plan
-            </div>
-            <div class="card-body" style="flex-direction: column; align-items: stretch; gap: 12px; padding-top: 15px;">
-                <div class="glass-panel"
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.03);">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div
-                            style="width: 35px; height: 35px; border-radius: 50%; background: rgba(231, 76, 60, 0.2); display: flex; align-items: center; justify-content: center; color: #e74c3c; font-weight: bold;">
-                            1</div>
-                        <div>
-                            <div style="font-weight: 600; color: var(--text-main);">Train #9021</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Dest: Vienna</div>
-                        </div>
-                    </div>
-                    <span
-                        style="padding: 4px 12px; background: rgba(46, 204, 113, 0.2); color: #2ecc71; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Ready</span>
-                </div>
-                <div class="glass-panel"
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.03);">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div
-                            style="width: 35px; height: 35px; border-radius: 50%; background: rgba(231, 76, 60, 0.2); display: flex; align-items: center; justify-content: center; color: #e74c3c; font-weight: bold;">
-                            2</div>
-                        <div>
-                            <div style="font-weight: 600; color: var(--text-main);">Train #4412</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Dest: Munich</div>
-                        </div>
-                    </div>
-                    <span
-                        style="padding: 4px 12px; background: rgba(241, 196, 15, 0.2); color: #f1c40f; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Loading</span>
-                </div>
-            </div>
+</div>
+
+<!-- Modules Grid -->
+<h2 style="margin: 15px 0 12px 0; font-size: 1.1rem; color: var(--text-muted);">Toyota Modules</h2>
+<div class="content-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+
+    <a href="{{ url_for('toyota_vagoni') }}" class="card glass-panel"
+        style="text-decoration: none; color: inherit; transition: all 0.3s;">
+        <div
+            style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #e74c3c, #c0392b); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);">
+            <i class="fas fa-train" style="color: white; font-size: 1.2rem;"></i>
         </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Vagoni (Train Loading)</h3>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Process Odstrel/Plan files, generate WAG
+            lists and eTL reports.</p>
+    </a>
 
-    </div>
+    <a href="{{ url_for('toyota_customs') }}" class="card glass-panel"
+        style="text-decoration: none; color: inherit; transition: all 0.3s;">
+        <div
+            style="width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+            <i class="fas fa-stamp" style="color: var(--text-muted); font-size: 1.2rem;"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Carinjenje</h3>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Customs declarations and T2L processing.
+        </p>
+    </a>
 
-    <!-- Modules Grid -->
-    <h2 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--text-muted);">Toyota Modules</h2>
-    <div class="content-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+    <a href="{{ url_for('toyota_vessel_hub') }}" class="card glass-panel"
+        style="text-decoration: none; color: inherit; transition: all 0.3s;">
+        <div
+            style="width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+            <i class="fas fa-ship" style="color: var(--text-muted); font-size: 1.2rem;"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Ladje</h3>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Vessel schedule and discharge planning.
+        </p>
+    </a>
 
-        <a href="{{ url_for('toyota_vagoni') }}" class="card glass-panel"
-            style="text-decoration: none; color: inherit; transition: all 0.3s;">
-            <div
-                style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #e74c3c, #c0392b); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);">
-                <i class="fas fa-train" style="color: white; font-size: 1.2rem;"></i>
-            </div>
-            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Vagoni (Train Loading)</h3>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Process Odstrel/Plan files, generate WAG
-                lists and eTL reports.</p>
-        </a>
-
-        <a href="{{ url_for('toyota_customs') }}" class="card glass-panel"
-            style="text-decoration: none; color: inherit; transition: all 0.3s;">
-            <div
-                style="width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
-                <i class="fas fa-stamp" style="color: var(--text-muted); font-size: 1.2rem;"></i>
-            </div>
-            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Carinjenje</h3>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Customs declarations and T2L processing.
-            </p>
-        </a>
-
-        <a href="{{ url_for('toyota_vessel_hub') }}" class="card glass-panel"
-            style="text-decoration: none; color: inherit; transition: all 0.3s;">
-            <div
-                style="width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
-                <i class="fas fa-ship" style="color: var(--text-muted); font-size: 1.2rem;"></i>
-            </div>
-            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">Ladje</h3>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Vessel schedule and discharge planning.
-            </p>
-        </a>
-
-    </div>
 </div>
 
 <!-- Toyota Settings Modal -->

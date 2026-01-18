@@ -20,7 +20,8 @@
 </div>
 
 <!-- Configurable Grid -->
-<div class="content-grid" id="dashboardGrid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+<div class="content-grid" id="dashboardGrid"
+    style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); grid-auto-flow: dense;">
 
     <!-- KPI WIDGETS -->
     <div class="card glass-panel" data-widget="kpi_stock">
@@ -266,6 +267,34 @@
     .rearrange-item:active {
         cursor: grabbing;
     }
+
+    /* Smooth rearrange animations */
+    #dashboardGrid.rearrange-mode {
+        gap: 20px;
+    }
+
+    #dashboardGrid.rearrange-mode [data-widget] {
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+            opacity 0.2s ease,
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    #dashboardGrid.rearrange-mode [data-widget].dragging {
+        opacity: 0.6;
+        transform: scale(0.98);
+        z-index: 1000;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    #dashboardGrid.rearrange-mode [data-widget]:not(.dragging) {
+        transform: translateY(0);
+    }
+
+    #dashboardGrid.rearrange-mode [data-widget].drag-over {
+        border-color: rgba(46, 204, 113, 0.8) !important;
+        transform: scale(1.02);
+    }
 </style>
 <script>
     // Load settings on init
@@ -321,17 +350,29 @@
                 const recent = sortedTasks.slice(0, 5);
                 recent.forEach(t => {
                     const div = document.createElement('div');
-                    div.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 6px 0;';
+                    div.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer;';
                     div.innerHTML = `
-                        <i class="fas ${t.completed ? 'fa-check-circle' : 'fa-circle'}" style="font-size: 0.75rem; color: ${t.completed ? '#2ecc71' : '#555'};"></i>
+                        <i class="fas ${t.completed ? 'fa-check-circle' : 'fa-circle'}" 
+                           style="font-size: 0.9rem; color: ${t.completed ? '#2ecc71' : '#555'}; transition: all 0.2s;"
+                           onmouseover="this.style.color='${t.completed ? '#27ae60' : '#2ecc71'}'; this.style.transform='scale(1.2)';"
+                           onmouseout="this.style.color='${t.completed ? '#2ecc71' : '#555'}'; this.style.transform='scale(1)';"></i>
                         <span style="font-size: 0.85rem; flex: 1; ${t.completed ? 'text-decoration: line-through; color: #666;' : ''}">${t.title}</span>
                     `;
+                    div.onclick = () => toggleDashboardTask(t.id, !t.completed);
                     container.appendChild(div);
                 });
                 if (tasks.length > 5) {
                     container.innerHTML += `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px; padding-left: 20px;">+ ${tasks.length - 5} more...</div>`
                 }
             });
+    }
+
+    function toggleDashboardTask(id, completed) {
+        fetch('/api/tasks', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, completed })
+        }).then(() => loadMiniTasks());
     }
 
     function loadMyProjects() {
@@ -470,6 +511,7 @@
             btn.innerHTML = '<i class="fas fa-check"></i> Save Layout';
             btn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
             btn.style.boxShadow = '0 4px 15px rgba(46, 204, 113, 0.4)';
+            grid.classList.add('rearrange-mode');
 
             widgets.forEach(w => {
                 if (w.style.display !== 'none') {
@@ -478,6 +520,7 @@
                     w.style.border = '2px dashed rgba(52, 152, 219, 0.5)';
                     w.addEventListener('dragstart', widgetDragStart);
                     w.addEventListener('dragover', widgetDragOver);
+                    w.addEventListener('dragleave', widgetDragLeave);
                     w.addEventListener('drop', widgetDrop);
                     w.addEventListener('dragend', widgetDragEnd);
                 }
@@ -487,53 +530,84 @@
             btn.innerHTML = '<i class="fas fa-arrows-alt"></i> Re-arrange';
             btn.style.background = 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)';
             btn.style.boxShadow = '0 4px 15px rgba(52, 152, 219, 0.3)';
+            grid.classList.remove('rearrange-mode');
 
             widgets.forEach(w => {
                 w.draggable = false;
                 w.style.cursor = '';
                 w.style.border = '';
+                w.classList.remove('dragging', 'drag-over');
                 w.removeEventListener('dragstart', widgetDragStart);
                 w.removeEventListener('dragover', widgetDragOver);
+                w.removeEventListener('dragleave', widgetDragLeave);
                 w.removeEventListener('drop', widgetDrop);
                 w.removeEventListener('dragend', widgetDragEnd);
             });
         }
     }
 
+    let lastMoveTime = 0;
+    const MOVE_THROTTLE = 150; // ms between moves for smoother animation
+
     function widgetDragStart(e) {
         dragSrcWidget = this;
-        this.style.opacity = '0.5';
+        this.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+
+        // Slight delay for better visual
+        requestAnimationFrame(() => {
+            this.style.opacity = '0.5';
+        });
     }
 
     function widgetDragOver(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        this.style.borderColor = 'rgba(46, 204, 113, 0.8)';
+
+        if (dragSrcWidget === this) return;
+
+        // Throttle moves for smoother animation
+        const now = Date.now();
+        if (now - lastMoveTime < MOVE_THROTTLE) return;
+        lastMoveTime = now;
+
+        const grid = document.getElementById('dashboardGrid');
+        const targetRect = this.getBoundingClientRect();
+        const targetCenterY = targetRect.top + targetRect.height / 2;
+        const targetCenterX = targetRect.left + targetRect.width / 2;
+
+        // Remove drag-over from all widgets
+        grid.querySelectorAll('[data-widget]').forEach(w => w.classList.remove('drag-over'));
+        this.classList.add('drag-over');
+
+        // Determine position based on mouse
+        const insertBefore = e.clientY < targetCenterY ||
+            (e.clientY >= targetCenterY && e.clientX < targetCenterX);
+
+        if (insertBefore) {
+            grid.insertBefore(dragSrcWidget, this);
+        } else {
+            grid.insertBefore(dragSrcWidget, this.nextSibling);
+        }
+    }
+
+    function widgetDragLeave(e) {
+        this.classList.remove('drag-over');
     }
 
     function widgetDrop(e) {
         e.stopPropagation();
-        this.style.borderColor = 'rgba(52, 152, 219, 0.5)';
-
-        if (dragSrcWidget !== this) {
-            const grid = document.getElementById('dashboardGrid');
-            const widgets = Array.from(grid.querySelectorAll('[data-widget]'));
-            const fromIdx = widgets.indexOf(dragSrcWidget);
-            const toIdx = widgets.indexOf(this);
-
-            if (fromIdx < toIdx) {
-                grid.insertBefore(dragSrcWidget, this.nextSibling);
-            } else {
-                grid.insertBefore(dragSrcWidget, this);
-            }
-        }
+        e.preventDefault();
+        this.classList.remove('drag-over');
         return false;
     }
 
     function widgetDragEnd() {
-        this.style.opacity = '1';
+        this.style.opacity = '';
+        this.classList.remove('dragging');
         document.querySelectorAll('#dashboardGrid [data-widget]').forEach(w => {
+            w.classList.remove('drag-over');
             if (isRearrangeMode) {
                 w.style.borderColor = 'rgba(52, 152, 219, 0.5)';
             }
