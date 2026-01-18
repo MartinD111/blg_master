@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="glass-panel" style="max-width: 1200px; margin: 0 auto; padding: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="text-glow">Team Productivity</h2>
+        <input type="date" id="viewDate" class="glass-input" style="width: auto;">
+    </div>
+
+    <div class="glass-table-container">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Tasks Completed</th>
+                    <th>Progress</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody id="productivityTable">
+                <!-- Data injected here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal-overlay"
+        style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="glass-panel" style="width: 500px; max-width: 90%; padding: 30px; position: relative;">
+            <h3 id="modalTitle" class="text-glow" style="margin-bottom: 20px;">User Tasks</h3>
+            <div id="modalContent" style="max-height: 400px; overflow-y: auto;"></div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button onclick="document.getElementById('detailsModal').style.display='none'"
+                    class="btn glass-btn">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dateInput = document.getElementById('viewDate');
+    dateInput.value = new Date().toISOString().split('T')[0];
+    dateInput.addEventListener('change', loadData);
+
+    function loadData() {
+        const date = dateInput.value;
+        document.getElementById('productivityTable').innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>';
+
+        fetch(`/api/admin/all_tasks?date=${date}`)
+            .then(r => r.json())
+            .then(tasks => {
+                const grouped = {};
+
+                // Group by username
+                tasks.forEach(t => {
+                    if (!grouped[t.username]) grouped[t.username] = { total: 0, completed: 0, tasks: [] };
+                    grouped[t.username].total++;
+                    if (t.completed) grouped[t.username].completed++;
+                    grouped[t.username].tasks.push(t);
+                });
+
+                const tbody = document.getElementById('productivityTable');
+                tbody.innerHTML = '';
+
+                if (Object.keys(grouped).length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">No tasks logged for this date.</td></tr>';
+                    return;
+                }
+
+                for (const [username, data] of Object.entries(grouped)) {
+                    const progress = data.total === 0 ? 0 : Math.round((data.completed / data.total) * 100);
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td style="font-weight: bold;">${username}</td>
+                        <td>${data.completed} / ${data.total}</td>
+                        <td>
+                            <div style="background: rgba(255,255,255,0.1); border-radius: 5px; height: 10px; width: 100px; overflow: hidden;">
+                                <div style="width: ${progress}%; height: 100%; background: #00ff00;"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <button onclick='showDetails(${JSON.stringify(data.tasks).replace(/'/g, "&#39;")}, "${username}")' class="btn glass-btn" style="padding: 2px 10px; font-size: 0.8rem;">View</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            });
+    }
+
+    function showDetails(tasks, username) {
+        document.getElementById('modalTitle').innerText = `Tasks for ${username}`;
+        const content = document.getElementById('modalContent');
+        content.innerHTML = '';
+
+        tasks.forEach(t => {
+            const el = document.createElement('div');
+            el.style.padding = '10px';
+            el.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+            el.innerHTML = `
+                <i class="fas ${t.completed ? 'fa-check-circle' : 'fa-circle'}" style="color: ${t.completed ? '#0f0' : '#666'}; margin-right: 10px;"></i>
+                ${t.title}
+            `;
+            content.appendChild(el);
+        });
+
+        document.getElementById('detailsModal').style.display = 'flex';
+    }
+
+    // Init
+    loadData();
+</script>
+{% endblock %}

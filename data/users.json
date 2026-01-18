@@ -1,0 +1,66 @@
+{
+    "admin": {
+        "password": "admin",
+        "role": "admin",
+        "name": "Martin",
+        "avatar": "<i class=\"fas fa-dragon\"></i>",
+        "visible_modules": [
+            "Toyota",
+            "Volkswagen",
+            "Others",
+            "e-CMR Manager",
+            "Vagoni",
+            "Statistika",
+            "Fakture",
+            "Produktivnost",
+            "Admin"
+        ],
+        "dashboard_layout": [
+            "kpi_stock",
+            "kpi_dispatched",
+            "kpi_loading",
+            "daily_tasks_widget",
+            "projects_widget"
+        ],
+        "avatar_color": "#e67e22"
+    },
+    "martin.dumanic@blg.si": {
+        "password": "666666",
+        "role": "admin",
+        "name": "Martin Dumanic",
+        "avatar": "M",
+        "visible_modules": [
+            "Toyota",
+            "Volkswagen",
+            "Others",
+            "e-CMR Manager"
+        ],
+        "dashboard_layout": [
+            "kpi_stock",
+            "kpi_dispatched"
+        ]
+    },
+    "operativa": {
+        "password": "op",
+        "role": "operativa",
+        "name": "Operator",
+        "avatar": "\ud83d\udc77",
+        "visible_modules": [
+            "Toyota",
+            "Volkswagen"
+        ],
+        "dashboard_layout": [
+            "kpi_stock"
+        ]
+    },
+    "service": {
+        "password": "srv",
+        "role": "service_admin",
+        "name": "ServiceAdmin",
+        "avatar": "\ud83d\udd27",
+        "visible_modules": [
+            "Toyota"
+        ],
+        "dashboard_layout": []
+    }
+}

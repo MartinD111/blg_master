@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="glass-panel" style="max-width: 1000px; margin: 0 auto; padding: 30px;">
+    <h2 class="text-glow" style="margin-bottom: 30px;">User Management</h2>
+
+    <!-- Add User Form -->
+    <div class="glass-panel" style="background: rgba(255,255,255,0.05); padding: 20px; margin-bottom: 30px;">
+        <h3 style="margin-bottom: 15px;">Add New User</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <input type="text" id="newUsername" class="glass-input" placeholder="Username (e.g. jdoe)">
+            <input type="text" id="newName" class="glass-input" placeholder="Full Name">
+            <input type="password" id="newPassword" class="glass-input" placeholder="Password">
+
+            <select id="newRole" class="glass-input">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="operativa">Operativa</option>
+            </select>
+
+            <div style="grid-column: span 2; display: flex; align-items: center; justify-self: end;">
+                <button onclick="addUser()" class="btn glass-btn" style="background: rgba(0, 255, 0, 0.2);">
+                    <i class="fas fa-user-plus"></i> Create User
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User List -->
+    <div class="glass-table-container">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>Avatar</th>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for uname, u in all_users.items() %}
+                <tr>
+                    <td>
+                        <div class="avatar-circle"
+                            style="width: 30px; height: 30px; line-height: 30px; font-size: 1rem;">{{ u.avatar }}</div>
+                    </td>
+                    <td>{{ u.name }}</td>
+                    <td>{{ uname }}</td>
+                    <td>
+                        <span
+                            style="padding: 3px 8px; border-radius: 10px; background: {{ 'rgba(255,0,0,0.2)' if u.role == 'admin' else 'rgba(0,0,255,0.2)' }}; font-size: 0.8rem;">
+                            {{ u.role }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if uname != 'admin' %}
+                        <button onclick="deleteUser('{{ uname }}')" class="btn glass-btn"
+                            style="padding: 5px 10px; background: rgba(255,0,0,0.1); color: #ff9999;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function addUser() {
+        const username = document.getElementById('newUsername').value;
+        const name = document.getElementById('newName').value;
+        const password = document.getElementById('newPassword').value;
+        const role = document.getElementById('newRole').value;
+
+        if (!username || !password) {
+            alert('Username and Password are required');
+            return;
+        }
+
+        fetch('/api/admin/user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username, name, password, role
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Failed to add user');
+                }
+            });
+    }
+
+    function deleteUser(username) {
+        if (!confirm('Are you sure you want to delete user: ' + username + '?')) return;
+
+        fetch(`/api/admin/user?username=${username}`, {
+            method: 'DELETE'
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Failed to delete');
+                }
+            });
+    }
+</script>
+{% endblock %}

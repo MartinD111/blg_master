@@ -26,6 +26,11 @@
 
     --radius-pill: 50px;
     --radius-card: 28px;
+
+    /* Frosted Card UI */
+    --card-frosted: rgba(108, 92, 231, 0.15);
+    /* Frosted Blue/Violet base */
+    --card-border: rgba(108, 92, 231, 0.25);
 }
 
 /* Light Mode Overrides */
@@ -342,6 +347,37 @@ header {
     border-color: var(--accent-color);
 }
 
+/* GLOBAL DROPDOWN (SELECT) STYLING */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--glass-input-bg) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-input-border) !important;
+    border-radius: 50px !important;
+    padding: 10px 40px 10px 20px !important;
+    color: white !important;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 15px center !important;
+    background-size: 16px !important;
+}
+
+select:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+select option {
+    background: #1e1e2d !important;
+    color: white !important;
+}
+
 .search-icon {
     position: absolute;
     left: 10px;
@@ -526,105 +562,285 @@ html.dark .avatar-option {
 
 .active-profile {
     border-bottom: 2px solid var(--accent-color);
-}/ *   N a v i g a t i o n   I m p r o v e m e n t s   * /  
- . n a v - i t e m   {  
-         p o s i t i o n :   r e l a t i v e ;  
-         h e i g h t :   1 0 0 % ;  
-         d i s p l a y :   f l e x ;  
-         a l i g n - i t e m s :   c e n t e r ;  
- }  
-  
- / *   C e n t e r   D r o p d o w n s   * /  
- . d r o p d o w n - m e n u   {  
-         p o s i t i o n :   a b s o l u t e ;  
-         t o p :   1 0 0 % ;  
-         l e f t :   5 0 % ;  
-         t r a n s f o r m :   t r a n s l a t e X ( - 5 0 % )   t r a n s l a t e Y ( 1 0 p x ) ;  
-         b a c k g r o u n d :   r g b a ( 1 8 ,   1 8 ,   1 8 ,   0 . 9 5 ) ;  
-         b a c k d r o p - f i l t e r :   b l u r ( 1 2 p x ) ;  
-         b o r d e r :   1 p x   s o l i d   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 1 ) ;  
-         b o r d e r - r a d i u s :   1 r e m ;  
-         p a d d i n g :   0 . 5 r e m ;  
-         m i n - w i d t h :   2 2 0 p x ;  
-         o p a c i t y :   0 ;  
-         v i s i b i l i t y :   h i d d e n ;  
-         t r a n s i t i o n :   a l l   0 . 2 s   c u b i c - b e z i e r ( 0 . 1 6 ,   1 ,   0 . 3 ,   1 ) ;  
-         b o x - s h a d o w :   0   1 0 p x   4 0 p x   - 1 0 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 5 ) ;  
-         z - i n d e x :   5 0 ;  
- }  
-  
- . n a v - i t e m : h o v e r   . d r o p d o w n - m e n u   {  
-         o p a c i t y :   1 ;  
-         v i s i b i l i t y :   v i s i b l e ;  
-         t r a n s f o r m :   t r a n s l a t e X ( - 5 0 % )   t r a n s l a t e Y ( 0 ) ;  
- }  
-  
- / *   S t y l i n g   I t e m s   * /  
- . d r o p d o w n - i t e m   {  
-         l i s t - s t y l e :   n o n e ;  
-         p o s i t i o n :   r e l a t i v e ;  
-         / *   C o n t e x t   f o r   n e s t e d   * /  
- }  
-  
- . d r o p d o w n - l i n k   {  
-         d i s p l a y :   f l e x ;  
-         a l i g n - i t e m s :   c e n t e r ;  
-         g a p :   1 0 p x ;  
-         p a d d i n g :   0 . 7 5 r e m   1 r e m ;  
-         c o l o r :   # e 5 e 5 e 5 ;  
-         t e x t - d e c o r a t i o n :   n o n e ;  
-         f o n t - s i z e :   0 . 9 r e m ;  
-         f o n t - w e i g h t :   5 0 0 ;  
-         b o r d e r - r a d i u s :   0 . 7 5 r e m ;  
-         t r a n s i t i o n :   b a c k g r o u n d   0 . 1 5 s   e a s e ;  
- }  
-  
- . d r o p d o w n - l i n k : h o v e r   {  
-         b a c k g r o u n d :   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 1 ) ;  
-         c o l o r :   w h i t e ;  
- }  
-  
- . d r o p d o w n - l i n k   i   {  
-         w i d t h :   2 0 p x ;  
-         t e x t - a l i g n :   c e n t e r ;  
-         o p a c i t y :   0 . 7 ;  
- }  
-  
- / *   N e s t e d   D r o p d o w n s   ( F l y o u t   R i g h t )   * /  
- . d r o p d o w n - s u b m e n u   {  
-         p o s i t i o n :   a b s o l u t e ;  
-         t o p :   0 ;  
-         l e f t :   1 0 0 % ;  
-         m a r g i n - l e f t :   8 p x ;  
-         / *   G a p   * /  
-         b a c k g r o u n d :   r g b a ( 1 8 ,   1 8 ,   1 8 ,   0 . 9 5 ) ;  
-         b a c k d r o p - f i l t e r :   b l u r ( 1 2 p x ) ;  
-         b o r d e r :   1 p x   s o l i d   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 1 ) ;  
-         b o r d e r - r a d i u s :   1 r e m ;  
-         p a d d i n g :   0 . 5 r e m ;  
-         m i n - w i d t h :   2 0 0 p x ;  
-         o p a c i t y :   0 ;  
-         v i s i b i l i t y :   h i d d e n ;  
-         t r a n s f o r m :   t r a n s l a t e X ( - 1 0 p x ) ;  
-         t r a n s i t i o n :   a l l   0 . 2 s   c u b i c - b e z i e r ( 0 . 1 6 ,   1 ,   0 . 3 ,   1 ) ;  
-         b o x - s h a d o w :   0   1 0 p x   4 0 p x   - 1 0 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 5 ) ;  
- }  
-  
- . d r o p d o w n - i t e m : h o v e r > . d r o p d o w n - s u b m e n u   {  
-         o p a c i t y :   1 ;  
-         v i s i b i l i t y :   v i s i b l e ;  
-         t r a n s f o r m :   t r a n s l a t e X ( 0 ) ;  
- }  
-  
- / *   A r r o w   i n d i c a t o r   f o r   n e s t e d   i t e m s   * /  
- . h a s - s u b m e n u : : a f t e r   {  
-         c o n t e n t :   ' \ f 0 5 4 ' ;  
-         / *   F o n t A w e s o m e   c h e v r o n - r i g h t   * /  
-         f o n t - f a m i l y :   " F o n t   A w e s o m e   6   F r e e " ;  
-         f o n t - w e i g h t :   9 0 0 ;  
-         p o s i t i o n :   a b s o l u t e ;  
-         r i g h t :   1 r e m ;  
-         f o n t - s i z e :   0 . 7 r e m ;  
-         o p a c i t y :   0 . 5 ;  
- }  
- 
+}
+
+/* Navigation Improvements */
+.nav-item {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+
+}
+
+/* Center Dropdowns */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    min-width: 220px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+    z-index: 50;
+
+}
+
+.nav-item:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+
+}
+
+/* Styling Items */
+.dropdown-item {
+    list-style: none;
+    position: relative;
+    /* Context for nested */
+}
+
+.dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1rem;
+    color: #e5e5e5;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 0.75rem;
+    transition: background 0.15s ease;
+
+}
+
+.dropdown-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+
+}
+
+.dropdown-link i {
+    width: 20px;
+    text-align: center;
+    opacity: 0.7;
+
+}
+
+/* Nested Dropdowns (Flyout Right) */
+.dropdown-submenu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-left: 8px;
+    /* Gap */
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-10px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+
+}
+
+.dropdown-item:hover>.dropdown-submenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+/* Modern Toggle Switch */
+.toggle-switch {
+    width: 50px;
+    height: 30px;
+    background: rgba(125, 125, 125, 0.3);
+    border-radius: 30px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 26px;
+    height: 26px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toggle-switch.active {
+    background: var(--accent-color);
+}
+
+.toggle-switch.active::after {
+    transform: translateX(20px);
+}
+
+/* Kanban Board Styles */
+.kanban-board {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 20px;
+    overflow-x: auto;
+    align-items: flex-start;
+    height: calc(100vh - 150px);
+}
+
+.kanban-column {
+    background: rgba(20, 20, 30, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    min-width: 320px;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.kanban-header {
+    padding: 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.kanban-body {
+    padding: 15px;
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.kanban-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 15px;
+    cursor: grab;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.kanban-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: var(--accent-color);
+}
+
+.kanban-tag {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    width: fit-content;
+}
+
+.user-avatar-stack {
+    display: flex;
+}
+
+.user-avatar-stack .avatar-circle {
+    margin-right: -10px;
+    border: 2px solid var(--bg-dark);
+}
+
+/* Enhanced Buttons - Force Pill Shape Globally */
+.btn,
+.pill-btn,
+.glass-btn,
+button:not(.close-btn) {
+    border-radius: 50px !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn:hover,
+.pill-btn:hover,
+.glass-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar refinement for kanban */
+.kanban-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.has-submenu::after {
+    content: '\f054';
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    right: 1rem;
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+
+/* Kanban Actions */
+.kanban-actions {
+    margin-top: 10px;
+}
+
+.btn-archive {
+    width: 100%;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-archive:hover {
+    background: rgba(231, 76, 60, 0.15);
+    border-color: rgba(231, 76, 60, 0.3);
+    color: #e74c3c;
+}
+
+/* Assignee Stack Enhancements */
+.avatar-circle.stacked {
+    width: 24px;
+    height: 24px;
+    font-size: 0.7rem;
+    border: 2px solid var(--glass-bg);
+}

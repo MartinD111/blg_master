@@ -1,0 +1,185 @@
+[
+    {
+        "id": "1768736857.196629",
+        "title": "a",
+        "description": "",
+        "status": "in_progress",
+        "assignees": [],
+        "created_by": "admin",
+        "created_at": "2026-01-18T12:47:37.197014",
+        "archived": false
+    },
+    {
+        "id": "1768737371.272717",
+        "title": "UI Verification Project",
+        "category": "Toyota",
+        "description": "",
+        "status": "todo",
+        "assignees": [
+            "admin",
+            "operativa"
+        ],
+        "created_by": "admin",
+        "created_at": "2026-01-18T12:56:11.272985",
+        "archived": false,
+        "due_date": ""
+    },
+    {
+        "id": "1768747134.026773",
+        "title": "test",
+        "category": "Toyota",
+        "description": "",
+        "status": "todo",
+        "assignees": [],
+        "created_by": "admin",
+        "created_at": "2026-01-18T15:38:54.027177",
+        "archived": false
+    },
+    {
+        "id": "1768747617.709974",
+        "title": "test 2",
+        "category": "Volkswagen",
+        "description": "",
+        "status": "todo",
+        "assignees": [],
+        "created_by": "admin",
+        "created_at": "2026-01-18T15:46:57.710044",
+        "archived": false
+    },
+    {
+        "id": "1768749710.419765",
+        "title": "Verification Task",
+        "category": "Toyota",
+        "description": "",
+        "status": "done",
+        "assignees": [
+            "admin"
+        ],
+        "due_date": "",
+        "created_by": "admin",
+        "created_at": "2026-01-18T16:21:50.421537",
+        "archived": true,
+        "archived_at": "2026-01-18T16:28:04.632438"
+    },
+    {
+        "id": "1768751640.698001",
+        "title": "New Task",
+        "category": "Others",
+        "description": "",
+        "status": "todo",
+        "assignees": [
+            "admin"
+        ],
+        "due_date": "",
+        "created_by": "admin",
+        "created_at": "2026-01-18T16:54:00.698111",
+        "archived": false
+    },
+    {
+        "id": "1768751710.62906",
+        "title": "New Task",
+        "category": "Others",
+        "description": "",
+        "status": "todo",
+        "assignees": [
+            "admin"
+        ],
+        "due_date": "",
+        "created_by": "admin",
+        "created_at": "2026-01-18T16:55:10.629325",
+        "archived": false
+    },
+    {
+        "id": "1768751791.231875",
+        "title": "New Task",
+        "category": "Others",
+        "description": "",
+        "status": "todo",
+        "assignees": [
+            "admin"
+        ],
+        "due_date": "",
+        "created_by": "admin",
+        "created_at": "2026-01-18T16:56:31.232001",
+        "archived": false
+    },
+    {
+        "id": "1768752112.568301",
+        "title": "New Task",
+        "category": "Others",
+        "description": "",
+        "status": "on_hold",
+        "assignees": [
+            "admin"
+        ],
+        "due_date": "",
+        "created_by": "admin",
+        "created_at": "2026-01-18T17:01:52.568792",
+        "archived": false,
+        "checklist": [
+            {
+                "text": "Verify UI",
+                "completed": false
+            },
+            {
+                "text": "",
+                "completed": false
+            }
+        ]
+    },
+    {
+        "id": "1768752177.712155",
+        "title": "test",
+        "category": "Toyota",
+        "description": "",
+        "status": "in_progress",
+        "assignees": [
+            "admin"
+        ],
+        "due_date": "2026-01-18",
+        "created_by": "admin",
+        "created_at": "2026-01-18T17:02:57.712243",
+        "archived": false,
+        "checklist": [
+            {
+                "text": "test",
+                "completed": false
+            },
+            {
+                "text": "test",
+                "completed": false
+            }
+        ]
+    },
+    {
+        "id": "1768753130.126023",
+        "title": "New Task",
+        "category": "Others",
+        "description": "",
+        "status": "todo",
+        "assignees": [
+            "admin"
+        ],
+        "due_date": "",
+        "created_by": "admin",
+        "created_at": "2026-01-18T17:18:50.126038",
+        "archived": false
+    },
+    {
+        "id": "1768753168.820967",
+        "title": "New Task",
+        "category": "Volkswagen",
+        "description": "",
+        "status": "in_progress",
+        "assignees": [
+            "admin",
+            "operativa",
+            "service"
+        ],
+        "due_date": "2026-01-22",
+        "created_by": "admin",
+        "created_at": "2026-01-18T17:19:28.821015",
+        "archived": false,
+        "checklist": []
+    }
+]

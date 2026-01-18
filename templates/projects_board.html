@@ -1,0 +1,1085 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="glass-panel"
+    style="padding: 15px 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; border-radius: 25px;">
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <div>
+            <h1 class="text-glow" style="margin: 0; font-size: 1.6rem; font-weight: 700;">Task Board</h1>
+            <p style="margin: 2px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">Manage tasks for active projects
+            </p>
+        </div>
+
+        <!-- PROJECT SELECTOR -->
+        <div style="position: relative;">
+            <select id="boardContext" onchange="filterBoard()" style="width: 240px;">
+                <option value="all">All Projects</option>
+                <option value="Volkswagen">Volkswagen Project</option>
+                <option value="Toyota">Toyota Project</option>
+                <option value="Others">Internal Tasks</option>
+            </select>
+        </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="btn glass-btn" onclick="archiveCompletedInContext()"
+            style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; border: none; padding: 10px 20px; font-weight: 600; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3); border-radius: 50px;">
+            <i class="fas fa-box-archive"></i> Archive Project
+        </button>
+        <!-- MODERN CIRCLE PLUS BUTTON -->
+        <div class="fab-circle" onclick="openProjectModal('todo')" style="width: 42px; height: 42px;">
+            <i class="fas fa-plus"></i>
+        </div>
+    </div>
+</div>
+
+<!-- KANBAN BOARD -->
+<div class="loop-kanban-container" id="kanbanContainer">
+
+    <!-- COLUMN: TO DO -->
+    <div class="loop-column">
+        <div class="loop-header-pill" style="background: rgba(120, 120, 120, 0.2);">
+            <i class="fas fa-clipboard-list" style="color: #f1c40f;"></i>
+            <span>Not started</span>
+            <span class="loop-count" id="count-todo">0</span>
+        </div>
+        <div class="loop-column-body" id="col-todo" ondrop="drop(event, 'todo')" ondragover="allowDrop(event)">
+            <!-- Cards go here -->
+        </div>
+        <button class="add-card-btn" onclick="openProjectModal('todo')">
+            <i class="fas fa-plus"></i> Add card
+        </button>
+    </div>
+
+    <!-- COLUMN: IN PROGRESS -->
+    <div class="loop-column">
+        <div class="loop-header-pill" style="background: rgba(243, 156, 18, 0.2);">
+            <i class="fas fa-tools" style="color: #f39c12;"></i>
+            <span>In progress</span>
+            <span class="loop-count" id="count-inprogress">0</span>
+        </div>
+        <div class="loop-column-body" id="col-inprogress" ondrop="drop(event, 'in_progress')"
+            ondragover="allowDrop(event)">
+            <!-- Cards go here -->
+        </div>
+        <button class="add-card-btn" onclick="openProjectModal('in_progress')">
+            <i class="fas fa-plus"></i> Add card
+        </button>
+    </div>
+
+    <!-- COLUMN: ON HOLD -->
+    <div class="loop-column">
+        <div class="loop-header-pill" style="background: rgba(231, 76, 60, 0.2);">
+            <i class="fas fa-pause-circle" style="color: #e74c3c;"></i>
+            <span>On hold</span>
+            <span class="loop-count" id="count-onhold">0</span>
+        </div>
+        <div class="loop-column-body" id="col-onhold" ondrop="drop(event, 'on_hold')" ondragover="allowDrop(event)">
+            <!-- Cards go here -->
+        </div>
+        <button class="add-card-btn" onclick="openProjectModal('on_hold')">
+            <i class="fas fa-plus"></i> Add card
+        </button>
+    </div>
+
+    <!-- COLUMN: FINISHED -->
+    <div class="loop-column">
+        <div class="loop-header-pill" style="background: rgba(46, 204, 113, 0.2);">
+            <i class="fas fa-check-circle" style="color: #2ecc71;"></i>
+            <span>Finished</span>
+            <span class="loop-count" id="count-done">0</span>
+        </div>
+        <div class="loop-column-body" id="col-done" ondrop="drop(event, 'done')" ondragover="allowDrop(event)">
+            <!-- Cards go here -->
+        </div>
+        <button class="add-card-btn" onclick="openProjectModal('done')">
+            <i class="fas fa-plus"></i> Add card
+        </button>
+    </div>
+
+</div>
+
+<!-- CARD DETAILS MODAL (FULL LOOP STYLE) -->
+<div id="cardDetailsModal" class="modal-overlay"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2100; justify-content: center; align-items: center;">
+    <div class="loop-details-panel shadow-glow">
+        <div class="details-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <h2 style="margin: 0; font-size: 1.15rem; font-weight: 600; color: #fff;">Card details</h2>
+                <select id="editCategory" class="category-select"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--accent-color); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; outline: none; cursor: pointer;">
+                    <option value="Others" style="background: #222; color: #fff;">OTHERS</option>
+                    <option value="Volkswagen" style="background: #222; color: #0096ff;">VW</option>
+                    <option value="Toyota" style="background: #222; color: #ff3b30;">TOYOTA</option>
+                </select>
+            </div>
+            <div class="details-nav">
+                <i class="fas fa-chevron-left" title="Previous"></i>
+                <span id="detailNavIndicator" style="font-size: 0.8rem; opacity: 0.5;">Manage</span>
+                <i class="fas fa-chevron-right" title="Next"></i>
+                <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.1); margin: 0 5px;"></div>
+                <i class="fas fa-times" onclick="closeDetailsModal()"
+                    style="cursor: pointer; font-size: 1.2rem; color: #fff;"></i>
+            </div>
+        </div>
+
+        <div class="details-body">
+            <!-- TITLE FIELD -->
+            <div class="details-row">
+                <div class="details-label-col">
+                    <i class="fas fa-heading"></i>
+                    <span>Project Name</span>
+                </div>
+                <div class="details-value-col">
+                    <input type="text" id="editTitle" class="details-input-title" placeholder="Project name...">
+                </div>
+            </div>
+
+            <!-- OWNER (ASSIGNEES) FIELD -->
+            <div class="details-row">
+                <div class="details-label-col">
+                    <i class="far fa-user"></i>
+                    <span>Owner</span>
+                </div>
+                <div class="details-value-col">
+                    <div id="detailAssigneeContainer" class="detail-assignee-list">
+                        <!-- Pills go here -->
+                        <div class="add-owner-trigger" onclick="toggleEditAssigneeList(event)">
+                            <i class="fas fa-plus-circle"></i> Add owner
+                        </div>
+                    </div>
+                    <!-- Hidden multi-select list -->
+                    <div id="editAssigneeList" class="glass-panel floating-assignee-list" style="display: none;">
+                        {% for u_key, u_val in users.items() %}
+                        <div class="assignee-option" data-user="{{ u_key }}"
+                            onclick="toggleUserSelection('{{ u_key }}', this, event)">
+                            <div class="avatar-circle" style="width: 24px; height: 24px; font-size: 0.7rem;">{{
+                                u_val.avatar or u_val.name[0] }}</div>
+                            <span>{{ u_val.name }}</span>
+                            <i class="fas fa-check check-icon"></i>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- TARGET DATE FIELD -->
+            <div class="details-row">
+                <div class="details-label-col">
+                    <i class="far fa-calendar-alt"></i>
+                    <span>Target Date</span>
+                </div>
+                <div class="details-value-col">
+                    <input type="date" id="editDueDate" class="details-input-date">
+                </div>
+            </div>
+
+            <!-- STAGE (STATUS) -->
+            <div class="details-row">
+                <div class="details-label-col">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Stage</span>
+                </div>
+                <div class="details-value-col">
+                    <div id="detailStageContainer" class="detail-assignee-list">
+                        <!-- stage pill goes here -->
+                        <div class="stage-trigger" onclick="toggleEditStageList(event)">
+                            <span id="activeStageLabel">Not started</span>
+                            <i class="fas fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                    <!-- Hidden stage list -->
+                    <div id="editStageList" class="glass-panel floating-assignee-list"
+                        style="display: none; width: 180px;">
+                        <div class="assignee-option" onclick="selectStage('todo', event)">
+                            <i class="fas fa-clipboard-list" style="color: #f1c40f; width: 20px;"></i>
+                            <span>Not started</span>
+                        </div>
+                        <div class="assignee-option" onclick="selectStage('in_progress', event)">
+                            <i class="fas fa-tools" style="color: #f39c12; width: 20px;"></i>
+                            <span>In progress</span>
+                        </div>
+                        <div class="assignee-option" onclick="selectStage('on_hold', event)">
+                            <i class="fas fa-pause-circle" style="color: #e74c3c; width: 20px;"></i>
+                            <span>On hold</span>
+                        </div>
+                        <div class="assignee-option" onclick="selectStage('done', event)">
+                            <i class="fas fa-check-circle" style="color: #2ecc71; width: 20px;"></i>
+                            <span>Finished</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHECKLIST FIELD -->
+            <div class="details-row">
+                <div class="details-label-col">
+                    <i class="fas fa-list-ul"></i>
+                    <span>Checklist</span>
+                </div>
+                <div class="details-value-col">
+                    <div id="checklistContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Items populated via JS -->
+                    </div>
+                    <div class="add-checklist-item" onclick="addChecklistItem()"
+                        style="margin-top: 10px; color: var(--accent-color); cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                        <i class="fas fa-plus-circle"></i> Add subitem
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTES FIELD -->
+            <div class="details-row" style="align-items: flex-start; margin-top: 20px;">
+                <div class="details-label-col" style="padding-top: 10px;">
+                    <i class="fas fa-align-left"></i>
+                    <span>Notes</span>
+                </div>
+                <div class="details-value-col">
+                    <textarea id="editNotes" class="details-textarea"
+                        placeholder="Share updates of what you did today, plan to do tomorrow"></textarea>
+                </div>
+            </div>
+
+            <div class="details-row">
+                <div class="details-label-col">
+                    <i class="fas fa-plus"></i>
+                    <span>Add field</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="details-footer" style="display: flex; justify-content: space-between; align-items: center;">
+            <button onclick="deleteCard()" class="btn glass-btn"
+                style="background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); padding: 10px 20px; border-radius: 50px;">
+                <i class="fas fa-trash-alt"></i> Delete
+            </button>
+            <button onclick="saveCardDetails()" class="pill-btn primary"
+                style="background: var(--accent-color); border-radius: 50px !important; padding: 10px 25px;">Save
+                Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- QUICK ADD MODAL REMOVED - NOW GOES DIRECTLY TO DETAILS -->
+
+<style>
+    /* FROSTED BLUE/VIOLET CARDS */
+    .loop-card {
+        background: rgba(108, 92, 231, 0.1) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(108, 92, 231, 0.2) !important;
+        border-radius: 20px;
+        padding: 18px;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .loop-card:hover {
+        background: rgba(108, 92, 231, 0.2) !important;
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: 0 10px 25px rgba(108, 92, 231, 0.15);
+        border-color: rgba(108, 92, 231, 0.4) !important;
+    }
+
+    .fab-circle {
+        background: var(--accent-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 6px 15px rgba(108, 92, 231, 0.3);
+    }
+
+    .fab-circle:hover {
+        transform: scale(1.1);
+        filter: brightness(1.1);
+    }
+
+    /* Loop Details Panel Refinement */
+    .loop-details-panel {
+        width: 720px;
+        max-width: 95vw;
+        height: 640px;
+        max-height: 90vh;
+        background: rgba(30, 25, 45, 0.85);
+        /* Frosted Deep Violet */
+        backdrop-filter: blur(40px) saturate(180%);
+        -webkit-backdrop-filter: blur(40px) saturate(180%);
+        border: 1px solid rgba(108, 92, 231, 0.3);
+        border-radius: 30px;
+        display: flex;
+        flex-direction: column;
+        color: #fff;
+        z-index: 2200;
+        position: relative;
+    }
+
+    .shadow-glow {
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(108, 92, 231, 0.1);
+    }
+
+    .details-header {
+        padding: 20px 30px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .details-nav {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: #888;
+    }
+
+    .details-body {
+        padding: 35px;
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+
+    .details-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 18px;
+        min-height: 42px;
+    }
+
+    .details-label-col {
+        width: 140px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #999;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .details-label-col i {
+        font-size: 0.9rem;
+        width: 18px;
+        text-align: center;
+    }
+
+    .details-value-col {
+        flex-grow: 1;
+        position: relative;
+    }
+
+    .details-input-title {
+        background: transparent;
+        border: none;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #fff;
+        width: 100%;
+        outline: none;
+        border-bottom: 2px solid transparent;
+        transition: 0.2s;
+    }
+
+    .details-input-title:focus {
+        border-bottom-color: var(--accent-color);
+    }
+
+    .details-textarea {
+        background: transparent;
+        border: none;
+        color: #ccc;
+        width: 100%;
+        min-height: 90px;
+        outline: none;
+        resize: none;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .details-input-date {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 8px;
+        outline: none;
+        font-size: 0.85rem;
+    }
+
+    .detail-assignee-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .owner-pill {
+        background: rgba(108, 92, 231, 0.15);
+        border: 1px solid rgba(108, 92, 231, 0.3);
+        padding: 4px 10px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #fff;
+    }
+
+    .add-owner-trigger {
+        color: var(--accent-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        transition: 0.2s;
+    }
+
+    .add-owner-trigger:hover {
+        background: rgba(108, 92, 231, 0.1);
+    }
+
+    .floating-assignee-list {
+        position: absolute;
+        width: 230px;
+        top: 100%;
+        left: 0;
+        background: #252535 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 10px;
+        z-index: 2500;
+        margin-top: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(20px);
+    }
+
+    .assignee-option {
+        padding: 10px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+        color: #eee;
+    }
+
+    .assignee-option:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .assignee-option.active {
+        background: rgba(108, 92, 231, 0.2);
+        color: #fff;
+    }
+
+    .assignee-option .check-icon {
+        opacity: 0;
+        color: var(--accent-color);
+    }
+
+    .assignee-option.active .check-icon {
+        opacity: 1;
+    }
+
+    .details-footer {
+        padding: 20px 30px;
+        background: #22222c;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom-left-radius: 24px;
+        border-bottom-right-radius: 24px;
+    }
+
+    .comment-area {
+        color: #666;
+        font-size: 0.85rem;
+        cursor: text;
+    }
+
+    .placeholder-action {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #666;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .placeholder-action:hover {
+        color: #888;
+    }
+
+    /* Kanban Structure */
+    .loop-kanban-container {
+        display: flex;
+        gap: 35px;
+        padding: 10px 5px 50px 5px;
+        overflow-x: auto;
+        align-items: flex-start;
+    }
+
+    .loop-column {
+        min-width: 320px;
+        width: 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .loop-header-pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 18px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        width: fit-content;
+        margin: 0 auto;
+    }
+
+    .loop-column-body {
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .user-avatar-stack {
+        display: flex;
+        align-items: center;
+        margin-left: 5px;
+    }
+
+    .avatar-circle.stacked {
+        margin-left: -10px;
+        border: 2px solid #1a1a24;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .avatar-circle.stacked:first-child {
+        margin-left: 0;
+    }
+
+    .loop-card-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: #888;
+    }
+
+    .loop-card-info i {
+        width: 14px;
+        text-align: center;
+    }
+
+    .add-card-btn {
+        background: transparent;
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        color: #666;
+        padding: 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .add-card-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #aaa;
+        border-style: solid;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .category-tag {
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        display: inline-block;
+    }
+
+    .tag-vw {
+        background: rgba(0, 150, 255, 0.15);
+        color: #0096ff;
+    }
+
+    .tag-toy {
+        background: rgba(255, 0, 0, 0.15);
+        color: #ff3b30;
+    }
+
+    .tag-others {
+        background: rgba(150, 150, 150, 0.15);
+        color: #aaa;
+    }
+
+    /* CUSTOM STAGE TRIGGER */
+    .stage-trigger {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 6px 15px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 0.85rem;
+        font-weight: 600;
+        min-width: 140px;
+    }
+
+    .stage-trigger:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* CHECKLIST STYLES */
+    .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 8px 12px;
+        border-radius: 12px;
+        transition: 0.2s;
+    }
+
+    .checklist-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .checklist-checkbox {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+        flex-shrink: 0;
+    }
+
+    .checklist-checkbox.checked {
+        background: var(--accent-color);
+        border-color: var(--accent-color);
+    }
+
+    .checklist-checkbox i {
+        font-size: 0.7rem;
+        color: white;
+        display: none;
+    }
+
+    .checklist-checkbox.checked i {
+        display: block;
+    }
+
+    .checklist-input {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 0.9rem;
+        width: 100%;
+        outline: none;
+    }
+
+    .checklist-input.completed {
+        text-decoration: line-through;
+        opacity: 0.5;
+    }
+
+    .remove-checklist-btn {
+        opacity: 0;
+        color: #e74c3c;
+        cursor: pointer;
+        transition: 0.2s;
+        padding: 4px;
+    }
+
+    .checklist-item:hover .remove-checklist-btn {
+        opacity: 0.6;
+    }
+
+    .remove-checklist-btn:hover {
+        opacity: 1 !important;
+    }
+</style>
+
+<script>
+    let projects = [];
+    let currentContext = 'all';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProjects();
+    });
+
+    function loadProjects() {
+        fetch('/api/projects')
+            .then(r => r.json())
+            .then(data => {
+                const currentUser = "{{ session['username'] }}";
+                const userRole = "{{ session['user']['role'] }}";
+
+                // FILTER: Only assigned people or owner or admin sees the project
+                if (userRole === 'admin') {
+                    projects = data.filter(p => !p.archived);
+                } else {
+                    projects = data.filter(p => !p.archived && (p.assignees.includes(currentUser) || p.created_by === currentUser));
+                }
+                renderBoard();
+            });
+    }
+
+    function filterBoard() {
+        currentContext = document.getElementById('boardContext').value;
+        renderBoard();
+    }
+
+    const USER_MAP = {{ users | tojson | safe }};
+
+    function renderBoard() {
+        ['todo', 'in_progress', 'on_hold', 'done'].forEach(status => {
+            const statusKey = status.replace('_', '');
+            const col = document.getElementById('col-' + statusKey);
+            if (!col) return;
+            col.innerHTML = '';
+
+            const filtered = projects.filter(p => {
+                const statusMatch = p.status === status;
+                const contextMatch = (currentContext === 'all') || (p.category === currentContext);
+                return statusMatch && contextMatch;
+            });
+
+            const countEl = document.getElementById('count-' + statusKey);
+            if (countEl) countEl.innerText = filtered.length;
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'loop-card';
+                card.onclick = () => openDetailsModal(p.id);
+
+                let catClass = 'tag-others';
+                if (p.category === 'Volkswagen') catClass = 'tag-vw';
+                if (p.category === 'Toyota') catClass = 'tag-toy';
+
+                let avatarsHtml = '';
+                if (p.assignees && p.assignees.length > 0) {
+                    avatarsHtml = '<div class="user-avatar-stack">';
+                    p.assignees.forEach(uname => {
+                        const uInfo = USER_MAP[uname];
+                        const initials = uInfo ? (uInfo.avatar || uInfo.name[0]) : uname[0];
+                        avatarsHtml += `<div class="avatar-circle stacked" style="width: 22px; height: 22px; font-size: 0.65rem;" title="${uname}">${initials}</div>`;
+                    });
+                    avatarsHtml += '</div>';
+                }
+
+                card.innerHTML = `
+                    <span class="category-tag ${catClass}">${p.category || 'Others'}</span>
+                    <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; color: #fff;">${p.title}</div>
+                    <div style="font-size: 0.82rem; color: #999; margin-bottom: 15px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        ${p.description || 'No notes added...'}
+                    </div>
+                    <div class="loop-card-info">
+                        <i class="far fa-user"></i>
+                        ${avatarsHtml || '<span style="opacity: 0.5;">Unassigned</span>'}
+                    </div>
+                    <div class="loop-card-info" style="margin-top: 6px;">
+                        <i class="far fa-calendar-alt"></i>
+                        <span style="${p.due_date ? 'color: #ccc;' : 'opacity: 0.5;'}">${p.due_date || 'No date'}</span>
+                    </div>
+                `;
+                col.appendChild(card);
+            });
+        });
+    }
+
+    let activeCardId = null;
+    let selectedAssignees = [];
+    let currentChecklist = [];
+    let currentStage = 'todo';
+
+    const STAGE_MAP = {
+        'todo': { label: 'Not started', icon: 'fa-clipboard-list', color: '#f1c40f' },
+        'in_progress': { label: 'In progress', icon: 'fa-tools', color: '#f39c12' },
+        'on_hold': { label: 'On hold', icon: 'fa-pause-circle', color: '#e74c3c' },
+        'done': { label: 'Finished', icon: 'fa-check-circle', color: '#2ecc71' }
+    };
+
+    function openDetailsModal(id) {
+        const p = projects.find(x => x.id === id);
+        if (!p) return;
+        activeCardId = id;
+        selectedAssignees = [...(p.assignees || [])];
+        currentChecklist = [...(p.checklist || [])];
+        currentStage = p.status || 'todo';
+
+        document.getElementById('cardDetailsModal').style.display = 'flex';
+        document.getElementById('editTitle').value = p.title;
+        document.getElementById('editDueDate').value = p.due_date || '';
+        document.getElementById('editNotes').value = p.description || '';
+
+        updateStageUI();
+        renderChecklist();
+        document.getElementById('editCategory').value = p.category || 'Others';
+
+        renderDetailAssignees();
+    }
+
+    function closeDetailsModal() {
+        document.getElementById('cardDetailsModal').style.display = 'none';
+        document.getElementById('editAssigneeList').style.display = 'none';
+        activeCardId = null;
+    }
+
+    function renderDetailAssignees() {
+        const container = document.getElementById('detailAssigneeContainer');
+        container.innerHTML = '';
+
+        selectedAssignees.forEach(uname => {
+            const uInfo = USER_MAP[uname];
+            const display = uInfo ? (uInfo.avatar || uInfo.name[0]) : uname[0];
+            const pill = document.createElement('div');
+            pill.className = 'owner-pill';
+            pill.innerHTML = `
+                <div class="avatar-circle" style="width: 22px; height: 22px; font-size: 0.7rem; background: var(--accent-color);">${display}</div>
+                <span>${uInfo ? uInfo.name : uname}</span>
+                <i class="fas fa-times" onclick="removeAssigneeFromCard('${uname}', event)" style="font-size: 0.75rem; cursor: pointer; opacity: 0.6; margin-left: 5px;"></i>
+            `;
+            container.appendChild(pill);
+        });
+
+        const addBtn = document.createElement('div');
+        addBtn.className = 'add-owner-trigger';
+        addBtn.onclick = (e) => toggleEditAssigneeList(e);
+        addBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add owner';
+        container.appendChild(addBtn);
+
+        // Update checklist options
+        document.querySelectorAll('#editAssigneeList .assignee-option').forEach(el => {
+            if (selectedAssignees.includes(el.dataset.user)) el.classList.add('active');
+            else el.classList.remove('active');
+        });
+    }
+
+    function toggleEditAssigneeList(e) {
+        e.stopPropagation();
+        const list = document.getElementById('editAssigneeList');
+        list.style.display = list.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleUserSelection(uname, el, e) {
+        e.stopPropagation();
+        if (selectedAssignees.includes(uname)) {
+            selectedAssignees = selectedAssignees.filter(x => x !== uname);
+        } else {
+            selectedAssignees.push(uname);
+        }
+        renderDetailAssignees();
+    }
+
+    function removeAssigneeFromCard(uname, e) {
+        e.stopPropagation();
+        selectedAssignees = selectedAssignees.filter(x => x !== uname);
+        renderDetailAssignees();
+    }
+
+    function saveCardDetails() {
+        if (!activeCardId) return;
+
+        const updates = {
+            id: activeCardId,
+            title: document.getElementById('editTitle').value,
+            category: document.getElementById('editCategory').value,
+            due_date: document.getElementById('editDueDate').value,
+            status: currentStage,
+            description: document.getElementById('editNotes').value,
+            assignees: selectedAssignees,
+            checklist: currentChecklist
+        };
+
+        fetch('/api/projects', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+        }).then(r => r.json()).then(() => {
+            loadProjects(); // Full reload to ensure sync
+            closeDetailsModal();
+        });
+    }
+
+    // --- STAGE LOGIC ---
+    function toggleEditStageList(e) {
+        e.stopPropagation();
+        const list = document.getElementById('editStageList');
+        list.style.display = list.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('editAssigneeList').style.display = 'none';
+    }
+
+    function selectStage(status, e) {
+        if (e) e.stopPropagation();
+        currentStage = status;
+        updateStageUI();
+        document.getElementById('editStageList').style.display = 'none';
+    }
+
+    function updateStageUI() {
+        const info = STAGE_MAP[currentStage];
+        const label = document.getElementById('activeStageLabel');
+        label.innerHTML = `<i class="fas ${info.icon}" style="color: ${info.color}; width: 20px;"></i> ${info.label}`;
+    }
+
+    // --- CHECKLIST LOGIC ---
+    function renderChecklist() {
+        const container = document.getElementById('checklistContainer');
+        container.innerHTML = '';
+
+        currentChecklist.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'checklist-item';
+            div.innerHTML = `
+                <div class="checklist-checkbox ${item.completed ? 'checked' : ''}" onclick="toggleChecklistItem(${index})">
+                    <i class="fas fa-check"></i>
+                </div>
+                <input type="text" class="checklist-input ${item.completed ? 'completed' : ''}" 
+                    value="${item.text}" placeholder="Add subtask..." 
+                    onchange="updateChecklistItem(${index}, this.value)"
+                    onkeydown="if(event.key === 'Enter') this.blur()">
+                <i class="fas fa-trash remove-checklist-btn" onclick="removeChecklistItem(${index})"></i>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function addChecklistItem() {
+        currentChecklist.push({ text: '', completed: false });
+        renderChecklist();
+        // Focus the new input
+        const inputs = document.querySelectorAll('.checklist-input');
+        if (inputs.length > 0) inputs[inputs.length - 1].focus();
+    }
+
+    function toggleChecklistItem(index) {
+        currentChecklist[index].completed = !currentChecklist[index].completed;
+        renderChecklist();
+    }
+
+    function updateChecklistItem(index, text) {
+        currentChecklist[index].text = text;
+    }
+
+    function removeChecklistItem(index) {
+        currentChecklist.splice(index, 1);
+        renderChecklist();
+    }
+
+    function openProjectModal(preselectStatus = 'todo') {
+        const defaultTitle = "New Task";
+        const category = (currentContext !== 'all' && currentContext !== '') ? currentContext : "Others";
+
+        fetch('/api/projects', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: defaultTitle,
+                category: category,
+                status: preselectStatus,
+                assignees: ["{{ session['username'] }}"]
+            })
+        }).then(r => r.json()).then(data => {
+            loadProjects();
+            projects.push(data);
+            openDetailsModal(data.id);
+
+            setTimeout(() => {
+                const titleInput = document.getElementById('editTitle');
+                if (titleInput) {
+                    titleInput.focus();
+                    titleInput.select();
+                }
+            }, 300);
+        });
+    }
+
+    function closeProjectModal() { } // Dummy for legacy triggers
+    function createProject() { } // Dummy
+
+    function deleteCard() {
+        if (!activeCardId) return;
+        const p = projects.find(x => x.id === activeCardId);
+        if (!p) return;
+
+        if (!confirm(`Are you sure you want to delete "${p.title}"? This action cannot be undone.`)) return;
+
+        fetch(`/api/projects?id=${activeCardId}`, {
+            method: 'DELETE'
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                closeDetailsModal();
+                loadProjects();
+            } else {
+                alert('Failed to delete project');
+            }
+        });
+    }
+
+    function archiveCompletedInContext() {
+        const toArchive = projects.filter(p => p.status === 'done' && (currentContext === 'all' || p.category === currentContext));
+        if (toArchive.length === 0) {
+            alert('No finished projects to archive.');
+            return;
+        }
+        if (!confirm(`Archive ${toArchive.length} finished project(s)?`)) return;
+
+        Promise.all(toArchive.map(p =>
+            fetch('/api/projects', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: p.id, archived: true })
+            })
+        )).then(() => loadProjects());
+    }
+
+    // Drag support
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev, id) { ev.dataTransfer.setData("text", id); }
+    function drop(ev, status) {
+        ev.preventDefault();
+        const id = ev.dataTransfer.getData("text");
+        fetch('/api/projects', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, status: status })
+        }).then(() => loadProjects());
+    }
+
+    window.onclick = function (event) {
+        const list = document.getElementById('editAssigneeList');
+        if (list && !event.target.closest('.details-value-col')) {
+            list.style.display = 'none';
+        }
+    };
+</script>
+{% endblock %}

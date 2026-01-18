@@ -1,0 +1,119 @@
+[
+    {
+        "id": "1768737371.27802",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "[Toyota] UI Verification Project",
+        "project_id": "1768737371.272717",
+        "completed": true,
+        "timestamp": "2026-01-18T12:56:11.278033"
+    },
+    {
+        "id": "1768749590.67101",
+        "username": "operativa",
+        "date": "2026-01-18",
+        "title": "[Toyota] UI Verification Project",
+        "project_id": "1768737371.272717",
+        "completed": false,
+        "timestamp": "2026-01-18T16:19:50.671667"
+    },
+    {
+        "id": "1768749710.563159",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "[Toyota] Verification Task",
+        "project_id": "1768749710.419765",
+        "completed": true,
+        "timestamp": "2026-01-18T16:21:50.563176"
+    },
+    {
+        "id": "1768751640.714765",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "[Others] New Task",
+        "project_id": "1768751640.698001",
+        "completed": true,
+        "timestamp": "2026-01-18T16:54:00.714777"
+    },
+    {
+        "id": "1768751710.673938",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "[Others] New Task",
+        "project_id": "1768751710.62906",
+        "completed": true,
+        "timestamp": "2026-01-18T16:55:10.673949"
+    },
+    {
+        "id": "1768751791.27529",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "[Others] New Task",
+        "project_id": "1768751791.231875",
+        "completed": true,
+        "timestamp": "2026-01-18T16:56:31.275298"
+    },
+    {
+        "id": "1768752019.019769",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "ttt",
+        "project_id": null,
+        "completed": true,
+        "timestamp": "2026-01-18T17:00:19.023535"
+    },
+    {
+        "id": "1768752112.57466",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "[Others] New Task",
+        "project_id": "1768752112.568301",
+        "completed": true,
+        "timestamp": "2026-01-18T17:01:52.574673"
+    },
+    {
+        "id": "1768752177.719566",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "[Toyota] test",
+        "project_id": "1768752177.712155",
+        "completed": false,
+        "timestamp": "2026-01-18T17:02:57.719575"
+    },
+    {
+        "id": "1768753130.131905",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "[Others] New Task",
+        "project_id": "1768753130.126023",
+        "completed": false,
+        "timestamp": "2026-01-18T17:18:50.131943"
+    },
+    {
+        "id": "1768753168.847235",
+        "username": "admin",
+        "date": "2026-01-18",
+        "title": "[Volkswagen] New Task",
+        "project_id": "1768753168.820967",
+        "completed": false,
+        "timestamp": "2026-01-18T17:19:28.847244"
+    },
+    {
+        "id": "1768753184.988354",
+        "username": "operativa",
+        "date": "2026-01-18",
+        "title": "[Volkswagen] New Task",
+        "project_id": "1768753168.820967",
+        "completed": false,
+        "timestamp": "2026-01-18T17:19:44.988371"
+    },
+    {
+        "id": "1768753185.005654",
+        "username": "service",
+        "date": "2026-01-18",
+        "title": "[Volkswagen] New Task",
+        "project_id": "1768753168.820967",
+        "completed": false,
+        "timestamp": "2026-01-18T17:19:45.005666"
+    }
+]

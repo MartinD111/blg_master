@@ -35,13 +35,10 @@ def render_spa(template_name_or_list, **context):
         context['spa_mode'] = True
     return render_template(template_name_or_list, **context)
 
-# Mock User Data - Added 'avatar'
-USERS = {
-    'admin': {'password': 'admin', 'role': 'admin', 'name': 'Martin', 'avatar': '👨‍💻'},
-    'martin.dumanic@blg.si': {'password': '666666', 'role': 'admin', 'name': 'Martin Dumanic', 'avatar': 'M'},
-    'operativa': {'password': 'op', 'role': 'operativa', 'name': 'Operator', 'avatar': '👷'},
-    'service': {'password': 'srv', 'role': 'service_admin', 'name': 'ServiceAdmin', 'avatar': '🔧'}
-}
+from database import db
+
+# USERS dictionary removed in favor of database
+# USERS = { ... }
 
 @app.context_processor
 def inject_utilities():
@@ -63,11 +60,14 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        user = USERS.get(username)
+        user = db.get_user(username)
         if user and user['password'] == password:
             # Ensure avatar exists in session
             if 'avatar' not in user: user['avatar'] = '👤'
+            if 'avatar_color' not in user: user['avatar_color'] = 'var(--accent-color)'
             session['user'] = user
+            # Store username explicitly for easy DB lookups later if needed
+            session['username'] = username 
             return redirect(url_for('index'))
         else:
             flash('Invalid credentials')
@@ -77,6 +77,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('user', None)
+    session.pop('username', None)
     return redirect(url_for('login'))
 
 @app.route('/api/update-avatar', methods=['POST'])
@@ -85,18 +86,23 @@ def update_avatar():
     try:
         data = request.get_json()
         new_avatar = data.get('avatar')
+        new_color = data.get('avatar_color')
+        username = session.get('username')
+        updates = {}
+        
         if new_avatar:
-            # Update session
-            session['user']['avatar'] = new_avatar
-            session.modified = True 
+            updates['avatar'] = new_avatar
+        if new_color:
+            updates['avatar_color'] = new_color
             
-            # Update Mock DB (for this session lifecycle only since it's in-memory)
-            for k, v in USERS.items():
-                if v['name'] == session['user']['name']:
-                    USERS[k]['avatar'] = new_avatar
-                    break
-            
-            return jsonify({'success': True, 'avatar': new_avatar})
+        if updates and db.update_user_settings(username, updates):
+            # Update Session
+            if new_avatar:
+                session['user']['avatar'] = new_avatar
+            if new_color:
+                session['user']['avatar_color'] = new_color
+            session.modified = True
+            return jsonify({'success': True, 'avatar': new_avatar, 'avatar_color': new_color})
     except Exception as e:
         print(e)
     return jsonify({'success': False}), 400
@@ -556,6 +562,242 @@ def wip():
 @login_required
 def module_view(subpath):
     return render_spa('wip.html', active_module=subpath, user=session.get('user'))
+
+@app.route('/api/user/settings', methods=['GET', 'POST'])
+@login_required
+def user_settings():
+    if request.method == 'GET':
+        username = session.get('username')
+        user = db.get_user(username)
+        return jsonify({
+            'dashboard_layout': user.get('dashboard_layout', []),
+            'visible_modules': user.get('visible_modules', [])
+        })
+    
+    if request.method == 'POST':
+        try:
+            data = request.json
+            username = session.get('username')
+            updates = {}
+            if 'dashboard_layout' in data:
+                updates['dashboard_layout'] = data['dashboard_layout']
+            
+            if db.update_user_settings(username, updates):
+                return jsonify({'success': True})
+            return jsonify({'success': False, 'error': 'Failed to save'}), 500
+        except Exception as e:
+             return jsonify({'success': False, 'error': str(e)}), 500
+
+# --- ADMIN MODULE ---
+@app.route('/admin/users')
+@login_required
+def admin_users():
+    if session['user'].get('role') != 'admin':
+        return redirect(url_for('index'))
+    users = db.load_users()
+    return render_spa('admin_users.html', user=session['user'], all_users=users)
+
+@app.route('/api/admin/user', methods=['POST', 'DELETE'])
+@login_required
+def api_admin_user():
+    if session['user'].get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    if request.method == 'POST':
+        data = request.json
+        username = data.get('username')
+        if not username: return jsonify({'error': 'Username required'}), 400
+        
+        user_data = {
+            'username': username, # Add username to dict for convenience
+            'password': data.get('password', '123456'),
+            'role': data.get('role', 'user'),
+            'name': data.get('name', username),
+            'avatar': '👤',
+            'visible_modules': data.get('visible_modules', ['Toyota', 'Volkswagen']),
+            'dashboard_layout': ['kpi_stock']
+        }
+        if db.add_user(username, user_data):
+            return jsonify({'success': True})
+        return jsonify({'error': 'User already exists'}), 400
+
+    if request.method == 'DELETE':
+        username = request.args.get('username')
+        if username == 'admin':
+             return jsonify({'error': 'Cannot delete super admin'}), 400
+        if db.delete_user(username):
+             return jsonify({'success': True})
+        return jsonify({'error': 'User not found'}), 404
+        
+# --- DAILY TASKS MODULE ---
+@app.route('/tasks')
+@login_required
+def daily_tasks():
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    return render_spa('daily_tasks.html', user=session['user'], date=today)
+
+@app.route('/api/tasks', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@login_required
+def api_tasks():
+    username = session['username']
+    
+    if request.method == 'GET':
+        date = request.args.get('date', datetime.datetime.now().strftime("%Y-%m-%d"))
+        tasks = db.get_user_tasks(username, date)
+        return jsonify(tasks)
+        
+    if request.method == 'POST':
+        data = request.json
+        title = data.get('title')
+        date = data.get('date', datetime.datetime.now().strftime("%Y-%m-%d"))
+        if not title: return jsonify({'error': 'Title required'}), 400
+        new_task = db.add_task(username, title, date)
+        return jsonify(new_task)
+        
+    if request.method == 'PUT':
+        data = request.json
+        task_id = data.get('id')
+        completed = data.get('completed')
+        if db.update_task_status(task_id, completed):
+            return jsonify({'success': True})
+        return jsonify({'error': 'Task not found'}), 404
+        
+    if request.method == 'DELETE':
+        task_id = request.args.get('id')
+        if db.delete_task(task_id):
+            return jsonify({'success': True})
+        return jsonify({'error': 'Task not found'}), 404
+
+# --- ADMIN PRODUCTIVITY ---
+@app.route('/admin/productivity')
+@login_required
+def admin_productivity():
+    if session['user'].get('role') != 'admin':
+        return redirect(url_for('index'))
+    return render_spa('admin_productivity.html', user=session['user'])
+
+@app.route('/api/admin/all_tasks')
+@login_required
+def api_admin_all_tasks():
+    if session['user'].get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    date = request.args.get('date', datetime.datetime.now().strftime("%Y-%m-%d"))
+    tasks = db.get_all_tasks_by_date(date)
+    return jsonify(tasks)
+
+# --- PROJECTS MODULE ---
+@app.route('/projects/board')
+@login_required
+def projects_board():
+    users = db.load_users()
+    return render_spa('projects_board.html', user=session['user'], users=users)
+
+@app.route('/admin/projects/history')
+@login_required
+def projects_history():
+    if session['user'].get('role') != 'admin':
+        return redirect(url_for('index'))
+    return render_spa('projects_archive.html', user=session['user'])
+
+def sync_project_to_tasks(project):
+    """
+    Synchronizes project assignments and status to Daily Tasks.
+    """
+    pid = project['id']
+    title = project['title']
+    category = project.get('category', 'Others')
+    status = project['status']
+    assignees = project.get('assignees', [])
+    is_completed = (status == 'done')
+    
+    # Get all tasks linked to this project
+    existing_tasks = db.get_tasks_by_project(pid)
+    existing_map = {t['username']: t for t in existing_tasks}
+    
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+
+    # 1. Handle current assignees
+    for user in assignees:
+        # Format: [Category] Title
+        task_title = f"[{category}] {title}"
+        
+        if user in existing_map:
+            # Update existing task
+            task = existing_map[user]
+            updates = {}
+            if task.get('completed') != is_completed:
+                updates['completed'] = is_completed
+            if task.get('title') != task_title:
+                updates['title'] = task_title
+            
+            if updates:
+                db.update_task(task['id'], updates)
+                
+        else:
+            # Create new task
+            new_task = db.add_task(user, task_title, today, project_id=pid)
+            if is_completed:
+                db.update_task(new_task['id'], {'completed': True})
+
+    # 2. Handle removed assignees
+    for user, task in existing_map.items():
+        if user not in assignees:
+            db.delete_task(task['id'])
+
+@app.route('/api/projects', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@login_required
+def api_projects():
+    if request.method == 'GET':
+        projects = db.get_projects()
+        # Clean data for deleted users? No, better keep history.
+        return jsonify(projects)
+        
+    if request.method == 'POST':
+        data = request.json
+        new_project = {
+            'id': str(datetime.datetime.now().timestamp()),
+            'title': data.get('title'),
+            'category': data.get('category', 'Others'),
+            'description': data.get('description', ''),
+            'status': 'todo', # todo, in_progress, on_hold, done
+            'assignees': data.get('assignees', []),
+            'due_date': data.get('due_date', ''),
+            'created_by': session['username'],
+            'created_at': datetime.datetime.now().isoformat(),
+            'archived': False
+        }
+        db.save_project(new_project)
+        sync_project_to_tasks(new_project)
+        return jsonify(new_project)
+
+    if request.method == 'PUT':
+        data = request.json
+        project_id = data.get('id')
+        project = db.get_project(project_id)
+        if not project:
+            return jsonify({'error': 'Project not found'}), 404
+            
+        # Update allowed fields
+        if 'status' in data: project['status'] = data['status']
+        if 'title' in data: project['title'] = data['title']
+        if 'category' in data: project['category'] = data['category']
+        if 'description' in data: project['description'] = data['description']
+        if 'assignees' in data: project['assignees'] = data['assignees']
+        if 'due_date' in data: project['due_date'] = data['due_date']
+        if 'checklist' in data: project['checklist'] = data['checklist']
+        if 'archived' in data: 
+            project['archived'] = data['archived']
+            if data['archived']: project['archived_at'] = datetime.datetime.now().isoformat()
+            
+        db.save_project(project)
+        sync_project_to_tasks(project)
+        return jsonify({'success': True})
+        
+    if request.method == 'DELETE':
+        project_id = request.args.get('id')
+        if db.delete_project(project_id):
+            return jsonify({'success': True})
+        return jsonify({'error': 'Not found'}), 404
 
 if __name__ == '__main__':
     # Print map for debugging if needed

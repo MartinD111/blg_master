@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 20px; margin-bottom: 20px;">
+    <h1 class="text-glow" style="margin: 0; font-size: 1.8rem;">Project History</h1>
+    <p style="margin: 5px 0 0 0; color: var(--text-muted);">Archived active projects</p>
+</div>
+
+<div class="glass-panel" style="padding: 20px;">
+    <table style="width: 100%; border-collapse: collapse; color: var(--text-main);">
+        <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                <th style="padding: 10px;">Title</th>
+                <th style="padding: 10px;">Description</th>
+                <th style="padding: 10px;">Created By</th>
+                <th style="padding: 10px;">Archived Date</th>
+            </tr>
+        </thead>
+        <tbody id="archiveTableBody">
+            <!-- Populated via JS -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('/api/projects') // Gets all projects
+            .then(r => r.json())
+            .then(data => {
+                const archived = data.filter(p => p.archived);
+                const tbody = document.getElementById('archiveTableBody');
+
+                if (archived.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="padding:20px; text-align:center; color: var(--text-muted);">No archived projects found.</td></tr>';
+                    return;
+                }
+
+                archived.sort((a, b) => new Date(b.archived_at) - new Date(a.archived_at));
+
+                archived.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                    tr.innerHTML = `
+                    <td style="padding: 15px 10px; font-weight: 500;">${p.title}</td>
+                    <td style="padding: 15px 10px; color: var(--text-muted); font-size: 0.9rem;">${p.description}</td>
+                    <td style="padding: 15px 10px;">${p.created_by}</td>
+                    <td style="padding: 15px 10px;">${new Date(p.archived_at || p.created_at).toLocaleDateString()}</td>
+                `;
+                    tbody.appendChild(tr);
+                });
+            });
+    });
+</script>
+{% endblock %}

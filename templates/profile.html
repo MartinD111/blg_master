@@ -7,7 +7,7 @@
         <!-- User Info Section -->
         <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 40px;">
             <div id="big-avatar" onclick="openAvatarModal()"
-                style="width: 100px; height: 100px; border-radius: 50%; background: var(--accent-color); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; position: relative; overflow: hidden;">
+                style="width: 100px; height: 100px; border-radius: 50%; background: {{ user.avatar_color|default('var(--accent-color)') }}; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; position: relative; overflow: hidden;">
                 <span id="current-avatar-icon">
                     {% if user.avatar %}
                     {{ user.avatar | safe }}
@@ -90,6 +90,20 @@
             <div class="avatar-option" onclick="selectIcon('fa-horse', this)"><i class="fas fa-horse"></i></div>
         </div>
 
+        <!-- Color Picker Section -->
+        <h3 style="margin: 20px 0 15px 0; font-size: 1rem; color: var(--text-muted);">Choose Color</h3>
+        <div class="color-grid"
+            style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 25px;">
+            <div class="color-option" onclick="selectColor('#6c5ce7', this)" style="background: #6c5ce7;"></div>
+            <div class="color-option" onclick="selectColor('#3498db', this)" style="background: #3498db;"></div>
+            <div class="color-option" onclick="selectColor('#00cec9', this)" style="background: #00cec9;"></div>
+            <div class="color-option" onclick="selectColor('#2ecc71', this)" style="background: #2ecc71;"></div>
+            <div class="color-option" onclick="selectColor('#f1c40f', this)" style="background: #f1c40f;"></div>
+            <div class="color-option" onclick="selectColor('#e67e22', this)" style="background: #e67e22;"></div>
+            <div class="color-option" onclick="selectColor('#e74c3c', this)" style="background: #e74c3c;"></div>
+            <div class="color-option" onclick="selectColor('#fd79a8', this)" style="background: #fd79a8;"></div>
+        </div>
+
         <div style="display:flex; justify-content:center; gap:15px; margin-top:10px;">
             <button onclick="closeAvatarModal()" class="action-btn cancel-btn">Cancel</button>
             <button onclick="saveAvatar()" class="action-btn save-btn">Save</button>
@@ -154,6 +168,24 @@
         box-shadow: 0 0 15px var(--accent-color);
     }
 
+    .color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 3px solid transparent;
+    }
+
+    .color-option:hover {
+        transform: scale(1.1);
+    }
+
+    .color-option.selected {
+        border-color: white;
+        box-shadow: 0 0 15px currentColor;
+    }
+
     .action-btn {
         padding: 12px 30px;
         border-radius: 50px;
@@ -178,6 +210,7 @@
 
 <script>
     let selectedIconClass = null;
+    let selectedColor = null;
 
     function openAvatarModal() {
         document.getElementById('avatar-modal').style.display = 'flex';
@@ -185,9 +218,10 @@
 
     function closeAvatarModal() {
         document.getElementById('avatar-modal').style.display = 'none';
-        // Clear selection visual
         document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
         selectedIconClass = null;
+        selectedColor = null;
     }
 
     function selectIcon(iconClass, element) {
@@ -196,39 +230,45 @@
         element.classList.add('selected');
     }
 
+    function selectColor(color, element) {
+        selectedColor = color;
+        document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+    }
+
     function saveAvatar() {
-        if (!selectedIconClass) {
+        if (!selectedIconClass && !selectedColor) {
             closeAvatarModal();
             return;
         }
 
-        const newAvatarHtml = `<i class="fas ${selectedIconClass}"></i>`;
+        const newAvatarHtml = selectedIconClass ? `<i class="fas ${selectedIconClass}"></i>` : null;
+        const colorToSave = selectedColor; // Store before reset
+        const payload = {};
+        if (newAvatarHtml) payload.avatar = newAvatarHtml;
+        if (colorToSave) payload.avatar_color = colorToSave;
 
-        // Send to server
         fetch('{{ url_for("update_avatar") }}', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ avatar: newAvatarHtml })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update Big Avatar
-                    const iconSpan = document.getElementById('current-avatar-icon');
-                    iconSpan.innerHTML = newAvatarHtml;
-
-                    // Update Header Avatar as well (assuming it has ID 'header-avatar-icon')
-                    // Note: base.html doesn't have an ID on the avatar container usually, checking...
-                    // The base.html snippet showed <div class="avatar-circle">...</div>, no specific ID for js update.
-                    // We'll try to find it by class or reload the page. Since the user complained about "navigation" not updating, 
-                    // correct session storage is key. But immediate feedback is nice.
-
-                    const headerAvatar = document.querySelector('.header-right .avatar-circle');
-                    if (headerAvatar) {
-                        headerAvatar.innerHTML = newAvatarHtml;
+                    if (newAvatarHtml) {
+                        const iconSpan = document.getElementById('current-avatar-icon');
+                        iconSpan.innerHTML = newAvatarHtml;
+                        const headerAvatar = document.querySelector('.header-right .avatar-circle');
+                        if (headerAvatar) headerAvatar.innerHTML = newAvatarHtml;
                     }
+                    if (colorToSave) {
+                        const bigAvatar = document.getElementById('big-avatar');
+                        bigAvatar.style.background = colorToSave;
+                        const headerAvatar = document.querySelector('.header-right .avatar-circle');
+                        if (headerAvatar) headerAvatar.style.background = colorToSave;
+                    }
+                    closeAvatarModal();
                 } else {
                     alert('Failed to save avatar.');
                 }
@@ -237,8 +277,6 @@
                 console.error('Error:', error);
                 alert('Error saving avatar.');
             });
-
-        closeAvatarModal();
     }
 
     // Close modal on outside click

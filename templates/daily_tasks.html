@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="glass-panel" style="max-width: 800px; margin: 0 auto; padding: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="text-glow">Daily Tasks</h2>
+        <input type="date" id="taskDate" class="glass-input" style="width: auto;">
+    </div>
+
+    <!-- Progress Bar -->
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+        <div style="flex: 1; background: rgba(0,0,0,0.3); height: 8px; border-radius: 4px; overflow: hidden;">
+            <div id="progressBar"
+                style="width: 0%; height: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); border-radius: 4px; transition: width 0.5s ease;">
+            </div>
+        </div>
+        <span id="progressText"
+            style="font-size: 0.85rem; color: var(--text-muted); min-width: 60px; text-align: right;">0/0</span>
+        <button onclick="markAllDone()" class="btn glass-btn" id="markAllBtn"
+            style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; border: none; padding: 8px 16px; font-size: 0.8rem; font-weight: 600; border-radius: 20px; white-space: nowrap;">
+            <i class="fas fa-check-double"></i> Mark all done
+        </button>
+    </div>
+
+    <!-- Add Task Form -->
+    <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+        <input type="text" id="newTaskInput" class="glass-input" placeholder="What did you work on today?..."
+            onkeypress="handleEnter(event)" style="flex: 1;">
+        <button onclick="addTask()" class="btn glass-btn"
+            style="background: linear-gradient(135deg, var(--accent-color) 0%, #9b59b6 100%); color: white; border: none; padding: 12px 24px; font-weight: 600; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);">
+            <i class="fas fa-plus"></i> Add
+        </button>
+    </div>
+
+    <!-- Task List -->
+    <div id="taskList" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Tasks will be injected here -->
+        <div style="text-align: center; color: #666; padding: 20px;">Loading tasks...</div>
+    </div>
+</div>
+
+<style>
+    .task-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .task-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .task-item.completed {
+        background: rgba(46, 204, 113, 0.08);
+        border-color: rgba(46, 204, 113, 0.2);
+    }
+
+    .task-toggle {
+        width: 44px;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+    }
+
+    .task-toggle::after {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        background: #888;
+        border-radius: 50%;
+        top: 3px;
+        left: 3px;
+        transition: all 0.3s;
+    }
+
+    .task-toggle.active {
+        background: rgba(46, 204, 113, 0.3);
+    }
+
+    .task-toggle.active::after {
+        left: 23px;
+        background: #2ecc71;
+    }
+</style>
+
+<script>
+    const dateInput = document.getElementById('taskDate');
+
+    // Init with today or server date
+    dateInput.value = "{{ date }}";
+
+    dateInput.addEventListener('change', loadTasks);
+
+    function handleEnter(e) {
+        if (e.key === 'Enter') addTask();
+    }
+
+    function loadTasks() {
+        const date = dateInput.value;
+        const list = document.getElementById('taskList');
+        list.innerHTML = '<div style="text-align: center; color: #aaa;">Loading...</div>';
+
+        fetch(`/api/tasks?date=${date}`)
+            .then(r => r.json())
+            .then(tasks => {
+                allTaskIds = tasks; // Store for markAllDone
+                list.innerHTML = '';
+                if (tasks.length === 0) {
+                    list.innerHTML = '<div style="text-align: center; color: #666; padding: 20px; font-style: italic;">No tasks logged for this day.</div>';
+                    updateProgress(0, 0);
+                    return;
+                }
+
+                let completedCount = 0;
+                tasks.forEach(task => {
+                    if (task.completed) completedCount++;
+                    const el = document.createElement('div');
+                    el.className = 'task-item' + (task.completed ? ' completed' : '');
+
+                    el.innerHTML = `
+                        <div style="flex-grow: 1; display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 0.95rem; ${task.completed ? 'text-decoration: line-through; color: #888;' : ''}">${task.title}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button onclick="toggleTask('${task.id}', ${!task.completed})" class="task-toggle ${task.completed ? 'active' : ''}" title="${task.completed ? 'Mark incomplete' : 'Mark complete'}"></button>
+                        </div>
+                    `;
+                    list.appendChild(el);
+                });
+                updateProgress(completedCount, tasks.length);
+            });
+    }
+
+    function addTask() {
+        const input = document.getElementById('newTaskInput');
+        const title = input.value.trim();
+        if (!title) return;
+
+        const date = dateInput.value;
+
+        fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, date })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) alert(data.error);
+                else {
+                    input.value = '';
+                    loadTasks();
+                }
+            });
+    }
+
+    function toggleTask(id, nowCompleted) {
+        fetch('/api/tasks', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, completed: nowCompleted })
+        })
+            .then(r => r.json())
+            .then(data => {
+                loadTasks();
+            });
+    }
+
+    function deleteTask(id) {
+        if (!confirm('Are you sure?')) return;
+
+        fetch(`/api/tasks?id=${id}`, {
+            method: 'DELETE'
+        })
+            .then(r => r.json())
+            .then(data => {
+                loadTasks();
+            });
+    }
+
+    function updateProgress(done, total) {
+        const bar = document.getElementById('progressBar');
+        const text = document.getElementById('progressText');
+        const markAllBtn = document.getElementById('markAllBtn');
+
+        if (total === 0) {
+            bar.style.width = '0%';
+            text.innerHTML = '0/0';
+            markAllBtn.style.display = 'none';
+        } else {
+            const pct = Math.round((done / total) * 100);
+            bar.style.width = pct + '%';
+            bar.style.background = pct === 100 ? 'linear-gradient(90deg, #2ecc71, #27ae60)' : 'linear-gradient(90deg, #f1c40f, #e67e22)';
+            text.innerHTML = `${done}/${total}`;
+            markAllBtn.style.display = pct === 100 ? 'none' : 'inline-flex';
+        }
+    }
+
+    let allTaskIds = [];
+
+    function markAllDone() {
+        const incompleteTasks = allTaskIds.filter(t => !t.completed);
+        if (incompleteTasks.length === 0) return;
+
+        Promise.all(incompleteTasks.map(t =>
+            fetch('/api/tasks', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: t.id, completed: true })
+            })
+        )).then(() => loadTasks());
+    }
+
+    // Initial Load
+    loadTasks();
+</script>
+{% endblock %}
