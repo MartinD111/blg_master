@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- JSpreadsheet CE -->
+<script src="https://bossanovajs.github.io/jspreadsheet/v4/jexcel.js"></script>
+<link rel="stylesheet" href="https://bossanovajs.github.io/jspreadsheet/v4/jexcel.css" type="text/css" />
+<script src="https://jsuites.net/v4/jsuites.js"></script>
+<link rel="stylesheet" href="https://jsuites.net/v4/jsuites.css" type="text/css" />
+
+<style>
+    :root {
+        --sys-primary: #3498db;
+    }
+
+    .dark {
+        --sys-primary: #4dabf7;
+    }
+
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .dark .glass-panel {
+        background: rgba(22, 33, 58, 0.85);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    /* Table Styles Override */
+    .jexcel {
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .jexcel>thead>tr>td {
+        background-color: var(--sys-primary) !important;
+        color: white !important;
+        font-weight: 600;
+    }
+
+    .jexcel_content {
+        box-shadow: none !important;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .toolbar-btn {
+        background: var(--sys-primary);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.2s;
+    }
+
+    .toolbar-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+    }
+</style>
+
+<div style="max-width: 1600px; margin: 0 auto; padding: 20px;">
+
+    <div class="glass-panel"
+        style="padding: 2px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="{{ url_for('hub', name='volkswagen') }}"
+                style="color: grey; text-decoration: none; font-size: 1.2rem;"><i class="fas fa-arrow-left"></i></a>
+            <div>
+                <h1 style="margin: 0; font-size: 1.5rem; color: var(--sys-primary);">{% block title %}Schedule{%
+                    endblock %}</h1>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: grey;">{% block subtitle %}Manage data{% endblock
+                    %}</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <span id="saveStatus"
+                style="font-size: 0.9rem; color: grey; margin-right: 10px; display: flex; align-items: center;"></span>
+            <button onclick="saveData()" class="toolbar-btn"><i class="fas fa-save"></i> Save Changes</button>
+            <button onclick="exportExcel()" class="toolbar-btn" style="background: #27ae60;"><i
+                    class="fas fa-file-excel"></i> Export Excel</button>
+        </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="glass-panel" style="padding: 20px; overflow: hidden;">
+        <div id="spreadsheet"></div>
+    </div>
+
+</div>
+
+<script>
+    const API_ENDPOINT = "{% block api_endpoint %}{% endblock %}";
+    let mySpreadsheet = null;
+
+    // Fix for JSpreadsheet/JExcel reference issue
+    if (typeof jspreadsheet === 'undefined' && typeof jexcel !== 'undefined') {
+        window.jspreadsheet = jexcel;
+    }
+
+    // Columns Configuration
+    const COLUMNS = [
+        { type: 'text', title: 'NO.', width: 50 },
+        { type: 'text', title: 'VIN', width: 140 }, // B
+        { type: 'text', title: 'VESSEL', width: 120 }, // C
+        { type: 'text', title: 'DESTINATION', width: 100 }, // D
+        { type: 'text', title: 'VCP', width: 60 }, // E
+        { type: 'text', title: 'MODEL', width: 120 }, // F
+        { type: 'numeric', title: 'WEIGHT', width: 80 }, // G
+        { type: 'text', title: 'PLATE', width: 100 }, // H
+        { type: 'text', title: 'CARRIER', width: 100 }, // I
+        { type: 'calendar', title: 'DATE', width: 100, options: { format: 'DD.MM.YYYY' } }, // J
+        { type: 'text', title: 'MRN', width: 120 }, // K
+        { type: 'text', title: 'HS', width: 80 }, // L
+        { type: 'text', title: 'DIZ', width: 80 }, // M
+        { type: 'text', title: 'LOT', width: 80 }, // N
+        { type: 'text', title: 'MENJAVA TABLIC', width: 120 }, // O
+        { type: 'text', title: 'MENJAVA TABLIC', width: 120 }, // P (Duplicate as requested)
+    ];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadData();
+    });
+
+    function loadData() {
+        fetch(API_ENDPOINT)
+            .then(res => res.json())
+            .then(data => {
+                // If data is empty, init with some empty rows
+                if (!data || data.length === 0) {
+                    data = [[]]; // Start with at least one row
+                }
+
+                mySpreadsheet = jspreadsheet(document.getElementById('spreadsheet'), {
+                    data: data,
+                    columns: COLUMNS,
+                    minDimensions: [16, 20], // 16 cols because of config
+                    tableOverflow: true,
+                    tableHeight: '70vh',
+                    defaultColWidth: 100,
+                });
+            })
+            .catch(err => console.error('Error loading data:', err));
+    }
+
+    function saveData() {
+        const btn = document.querySelector('button[onclick="saveData()"]');
+        const status = document.getElementById('saveStatus');
+
+        btn.disabled = true;
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        const data = mySpreadsheet.getData();
+
+        fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    status.innerHTML = '<i class="fas fa-check" style="color: #2ecc71;"></i> Saved!';
+                    setTimeout(() => status.innerHTML = '', 3000);
+                } else {
+                    status.innerHTML = '<i class="fas fa-times" style="color: #e74c3c;"></i> Error!';
+                    alert('Save failed: ' + res.error);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                status.innerHTML = '<i class="fas fa-times" style="color: #e74c3c;"></i> Error!';
+            })
+            .finally(() => {
+                btn.disabled = false;
+            });
+    }
+
+    function exportExcel() {
+        mySpreadsheet.download();
+    }
+</script>
+{% endblock %}

@@ -129,6 +129,10 @@
                     data-key="downloadBtn">
                     <i data-lucide="download" class="w-4 h-4"></i> Prenesi Excel
                 </button>
+                <button onclick="downloadScheduleExport()" id="export-schedule-btn"
+                    class="hidden flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg shadow-blue-600/20 font-bold flex items-center justify-center gap-2 transition-transform active:scale-95">
+                    <i data-lucide="ship" class="w-4 h-4"></i> Export for Schedule
+                </button>
             </div>
         </div>
 
@@ -284,6 +288,7 @@
     }
 
     function processData(rows) {
+        rawVehicleData = []; // Reset
         if (rows.length < 2) return;
 
         let headerRowIdx = -1;
@@ -304,19 +309,32 @@
             headers = rows[0].map(h => h ? h.toString().trim().toUpperCase() : '');
         }
 
-        const idxStatus = headers.indexOf('STATUS');
-        const idxDest = headers.indexOf('DESTINATION');
-        const idxManufac = headers.indexOf('MANUFAC');
+        // Map Column Indices
+        const colMap = {
+            STATUS: headers.indexOf('STATUS'),
+            DESTINATION: headers.indexOf('DESTINATION'),
+            MANUFAC: headers.indexOf('MANUFAC'),
+            MODEL: -1,
+            VIN: headers.indexOf('VIN'),
+            COMM: -1,
+            ENGINE: -1,
+            TYPE: -1,
+            COLOR: -1,
+            WEIGHT: headers.indexOf('WEIGHT'),
+            VCP: headers.indexOf('VCP'),
+            DISCHARGE: headers.indexOf('DISCHARGE') // Date?
+        };
 
-        let idxModel = headers.indexOf('DESCRIPTION');
-        if (idxModel === -1) idxModel = headers.indexOf('MODEL');
-        if (idxModel === -1) idxModel = headers.indexOf('MODEL DESCRIPTION');
-        if (idxModel === -1) idxModel = headers.indexOf('MODEL_DESC');
+        // Fuzzy search for remaining cols
+        headers.forEach((h, idx) => {
+            if (h.includes('MODEL') || h.includes('DESCRIPTION')) colMap.MODEL = idx;
+            if (h.includes('COMM')) colMap.COMM = idx;
+            if (h.includes('ENGINE') || h.includes('POWER SOURCE')) colMap.ENGINE = idx; // Heuristic
+            if (h === 'VIN') colMap.VIN = idx; // Explicit override
+        });
 
-        const idxPower = headers.indexOf('POWER SOURCE');
-
-        if (idxStatus === -1 || idxDest === -1) {
-            alert("Napaka: Ne najdem stolpcev STATUS ali DESTINATION. Preverite strukturo datoteke.");
+        if (colMap.STATUS === -1 || colMap.DESTINATION === -1) {
+            alert("Napaka: Ne najdem stolpcev STATUS ali DESTINATION.");
             return;
         }
 
@@ -326,8 +344,8 @@
             const row = rows[i];
             if (!row || row.length === 0) continue;
 
-            const status = row[idxStatus] ? row[idxStatus].toString().trim() : '';
-            const destCode = row[idxDest] ? row[idxDest].toString().trim() : '';
+            const status = row[colMap.STATUS] ? row[colMap.STATUS].toString().trim() : '';
+            const destCode = row[colMap.DESTINATION] ? row[colMap.DESTINATION].toString().trim() : '';
 
             if (status !== '19') continue;
             if (!DESTINATIONS.hasOwnProperty(destCode)) continue;
@@ -335,22 +353,33 @@
             const fullDestName = DESTINATIONS[destCode];
             const destName = cleanDestinationName(fullDestName);
 
-            let manufac = row[idxManufac] ? row[idxManufac].toString().trim().toUpperCase() : 'UNKNOWN';
+            let manufac = (colMap.MANUFAC !== -1 && row[colMap.MANUFAC]) ? row[colMap.MANUFAC].toString().trim().toUpperCase() : 'UNKNOWN';
             if (manufac === 'VWNF') manufac = 'VW';
 
-            // --- ALEXANDRIA EXCLUSION LOGIC ---
-            if (destName === 'ALEXANDRIA' && (manufac === 'SEAT' || manufac === 'SKODA')) {
-                continue;
-            }
+            if (destName === 'ALEXANDRIA' && (manufac === 'SEAT' || manufac === 'SKODA')) continue;
 
-            const model = (idxModel !== -1 && row[idxModel]) ? row[idxModel].toString().trim() : 'UNKNOWN';
+            const model = (colMap.MODEL !== -1 && row[colMap.MODEL]) ? row[colMap.MODEL].toString().trim() : 'UNKNOWN';
+            const vin = (colMap.VIN !== -1 && row[colMap.VIN]) ? row[colMap.VIN].toString().trim() : '';
+            const weight = (colMap.WEIGHT !== -1 && row[colMap.WEIGHT]) ? row[colMap.WEIGHT] : '';
+            const vcp = (colMap.VCP !== -1 && row[colMap.VCP]) ? row[colMap.VCP] : '';
 
-            const powerSourceVal = (idxPower !== -1 && row[idxPower]) ? row[idxPower] : '';
+            // Store Raw Item
+            rawVehicleData.push({
+                vin: vin,
+                destination: destName, // Use cleaned name or code? Requested format implies generic fields.
+                vcp: vcp,
+                model: model,
+                weight: weight,
+                manufac: manufac,
+                row_raw: row // Keep ref if needed
+            });
+
+            // Grouping Logic (Same as before)
+            const powerSourceVal = (colMap.ENGINE !== -1) ? row[colMap.ENGINE] : ''; // Reusing heuristic
             const type = determinePowertrain(powerSourceVal);
 
             if (!groupedData[destName]) groupedData[destName] = {};
             if (!groupedData[destName][manufac]) groupedData[destName][manufac] = {};
-
             if (!groupedData[destName][manufac][model]) {
                 groupedData[destName][manufac][model] = { count: 0, ice: 0, hybrid: 0, bev: 0 };
             }
@@ -364,7 +393,6 @@
         processedDataForExport = Object.keys(groupedData).sort().map(dest => {
             const manufacObj = groupedData[dest];
             let destGrandTotal = 0;
-
             const manufacturers = Object.keys(manufacObj).sort().map(mName => {
                 const modelsObj = manufacObj[mName];
                 const modelsList = Object.keys(modelsObj).sort().map(modName => {
@@ -374,45 +402,41 @@
                 destGrandTotal += manTotal;
                 return { name: mName, models: modelsList, total: manTotal };
             });
-
             return { destination: dest, manufacturers: manufacturers, grandTotal: destGrandTotal };
         });
 
         document.getElementById('processing-status').classList.remove('hidden');
         document.getElementById('processing-status').classList.add('flex');
         document.getElementById('download-btn').classList.remove('hidden');
+        document.getElementById('export-schedule-btn').classList.remove('hidden'); // Show New Button
         document.getElementById('status-text').textContent = `${TEXTS[currentLang].processed} (${rows.length})`;
 
         renderPreview(processedDataForExport);
     }
 
-    // --- RENDERING ---
-    function renderPreview(data) {
-        const container = document.getElementById('preview-area');
-        container.innerHTML = '';
-        container.classList.remove('hidden');
+    container.classList.remove('hidden');
 
-        if (data.length === 0) {
-            container.innerHTML = `<p class="text-center text-gray-400 font-medium py-10">${TEXTS[currentLang].noData}</p>`;
-            return;
-        }
+    if (data.length === 0) {
+        container.innerHTML = `<p class="text-center text-gray-400 font-medium py-10">${TEXTS[currentLang].noData}</p>`;
+        return;
+    }
 
-        data.forEach(group => {
-            let manufacturersHtml = '';
+    data.forEach(group => {
+        let manufacturersHtml = '';
 
-            group.manufacturers.forEach((man, index) => {
-                let rowsHtml = '';
+        group.manufacturers.forEach((man, index) => {
+            let rowsHtml = '';
 
-                man.models.forEach(model => {
-                    let infoBadges = '';
-                    if (model.bev > 0) {
-                        infoBadges += `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 mr-2"><span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>BEV</span>`;
-                    }
-                    if (model.hybrid > 0) {
-                        infoBadges += `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>${model.hybrid} HYBRID</span>`;
-                    }
+            man.models.forEach(model => {
+                let infoBadges = '';
+                if (model.bev > 0) {
+                    infoBadges += `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 mr-2"><span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>BEV</span>`;
+                }
+                if (model.hybrid > 0) {
+                    infoBadges += `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>${model.hybrid} HYBRID</span>`;
+                }
 
-                    rowsHtml += `
+                rowsHtml += `
                         <tr class="group/row transition-colors hover:bg-gray-50 dark:hover:bg-white/5">
                             <td class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800">${model.name}</td>
                             <td class="px-4 py-3 text-center border-b border-gray-100 dark:border-gray-800 border-l border-r border-dashed dark:border-gray-800">
@@ -421,12 +445,12 @@
                             <td class="px-4 py-3 text-center border-b border-gray-100 dark:border-gray-800">${infoBadges}</td>
                         </tr>
                     `;
-                });
+            });
 
-                // --- SEPARATOR LINE (No Gap) ---
-                const separatorClass = index > 0 ? 'border-t border-gray-300 dark:border-gray-600' : '';
+            // --- SEPARATOR LINE (No Gap) ---
+            const separatorClass = index > 0 ? 'border-t border-gray-300 dark:border-gray-600' : '';
 
-                manufacturersHtml += `
+            manufacturersHtml += `
                     <div class="px-2 sm:px-6 ${separatorClass}">
                         <div class="flex justify-between items-center mb-4 pl-2 border-l-4 border-primary dark:border-primary-dark mt-4">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">${man.name}</h3>
@@ -451,12 +475,12 @@
                         </div>
                     </div>
                 `;
-            });
+        });
 
-            const card = document.createElement('div');
-            card.className = "bg-surface-card dark:bg-surface-cardDark rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden transition-all hover:shadow-2xl hover:translate-y-[-2px] border border-white/50 dark:border-gray-800 flex flex-col";
+        const card = document.createElement('div');
+        card.className = "bg-surface-card dark:bg-surface-cardDark rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden transition-all hover:shadow-2xl hover:translate-y-[-2px] border border-white/50 dark:border-gray-800 flex flex-col";
 
-            card.innerHTML = `
+        card.innerHTML = `
                 <div class="bg-gradient-to-r from-gray-50 to-white dark:from-white/5 dark:to-transparent p-6 sm:p-8 border-b border-gray-100 dark:border-gray-800">
                     <h2 class="text-4xl font-black uppercase tracking-tighter text-center text-transparent bg-clip-text bg-gradient-to-br from-blue-900 to-blue-600 dark:from-blue-100 dark:to-blue-400 opacity-90">${group.destination}</h2>
                 </div>
@@ -472,8 +496,8 @@
                 </div>
             `;
 
-            container.appendChild(card);
-        });
+        container.appendChild(card);
+    });
     }
 
     // --- GRID LAYOUT EXPORT ---

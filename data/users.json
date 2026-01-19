@@ -3,7 +3,7 @@
         "password": "admin",
         "role": "admin",
         "name": "Martin",
-        "avatar": "<i class=\"fas fa-dragon\"></i>",
+        "avatar": "<i class=\"fas fa-otter\"></i>",
         "visible_modules": [
             "Toyota",
             "Volkswagen",
@@ -22,7 +22,7 @@
             "daily_tasks_widget",
             "projects_widget"
         ],
-        "avatar_color": "#e67e22"
+        "avatar_color": "#f1c40f"
     },
     "martin.dumanic@blg.si": {
         "password": "666666",

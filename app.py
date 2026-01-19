@@ -609,6 +609,60 @@ def api_extract_hs():
         return jsonify({'error': str(e)}), 500
 
 
+
+# --- VW SHIP SCHEDULES MODULE ---
+
+VW_SCHEDULES_PORT_FILE = 'data/vw_schedules_port.json'
+VW_SCHEDULES_COLLECTED_FILE = 'data/vw_schedules_collected.json'
+
+def load_json_file(filepath):
+    if not os.path.exists(filepath): return []
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except: return []
+
+def save_json_file(filepath, data):
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2)
+
+@app.route('/vw/schedules/port')
+@login_required
+def vw_schedules_port():
+    return render_spa('vw_schedules_port.html', user=session.get('user'))
+
+@app.route('/vw/schedules/collected')
+@login_required
+def vw_schedules_collected():
+    return render_spa('vw_schedules_collected.html', user=session.get('user'))
+
+@app.route('/api/vw/schedules/port', methods=['GET', 'POST'])
+@login_required
+def api_vw_schedules_port():
+    if request.method == 'GET':
+        return jsonify(load_json_file(VW_SCHEDULES_PORT_FILE))
+    if request.method == 'POST':
+        try:
+            data = request.json
+            save_json_file(VW_SCHEDULES_PORT_FILE, data)
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+@app.route('/api/vw/schedules/collected', methods=['GET', 'POST'])
+@login_required
+def api_vw_schedules_collected():
+    if request.method == 'GET':
+        return jsonify(load_json_file(VW_SCHEDULES_COLLECTED_FILE))
+    if request.method == 'POST':
+        try:
+            data = request.json
+            save_json_file(VW_SCHEDULES_COLLECTED_FILE, data)
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+
 # Generic Hub Route
 @app.route('/hub/<name>')
 @login_required
