@@ -58,6 +58,18 @@
                     <input type="date" id="eta"
                         class="w-full bg-gray-50 dark:bg-black/20 border-none rounded-3xl py-4 px-6 text-lg font-bold focus:ring-2 focus:ring-toyota-red outline-none">
                 </div>
+
+                <!-- Toggle: Transfer -->
+                <div class="flex items-center gap-3 pt-2 pl-2">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="transferToggle" class="sr-only peer" checked>
+                        <div
+                            class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-toyota-red">
+                        </div>
+                        <span class="ml-3 text-sm font-bold text-gray-900 dark:text-gray-300">Prenesi v ladijske
+                            razporede</span>
+                    </label>
+                </div>
             </div>
 
             <!-- Drop Zones -->
@@ -244,6 +256,28 @@
             setupDL('btnDownloadCZ', 'CZ', dvhData.CZ);
             setupDL('btnDownloadUA', 'UA', dvhData.UA);
 
+            // Auto-Transfer Logic
+            if (document.getElementById('transferToggle').checked) {
+                const btn = document.querySelector('button[onclick="processFilesDVH()"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Transferring...`;
+
+                try {
+                    // Only transfer if data exists
+                    const p = [];
+                    if (dvhData.PL.length > 0) p.push(transferToSchedules('PL', dvhData.PL, vessel, fmtDate));
+                    if (dvhData.CZ.length > 0) p.push(transferToSchedules('CZ', dvhData.CZ, vessel, fmtDate));
+                    if (dvhData.UA.length > 0) p.push(transferToSchedules('UA', dvhData.UA, vessel, fmtDate));
+
+                    await Promise.all(p);
+                    btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> Done & Transferred`;
+                    setTimeout(() => btn.innerHTML = originalText, 3000);
+                } catch (e) {
+                    console.error("Transfer Error", e);
+                    btn.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i> Transfer Failed`;
+                }
+            }
+
         } catch (err) {
             console.error(err);
             document.getElementById('dvhError').innerText = "Error: " + err.message;
@@ -298,12 +332,29 @@
         i.addEventListener('change', () => { if (i.files[0]) { n.innerText = i.files[0].name; if (c) c.style.opacity = 1; } });
     }
 
-    function readFile(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(XLSX.read(new Uint8Array(e.target.result), { type: 'array' }));
-            reader.readAsArrayBuffer(file);
         });
+    }
+
+    async function transferToSchedules(type, data, vessel, etaFormatted) {
+        // Generate Buffer
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+        // Fix filename format for upload (using dots for date as per requirement implies, but let's stick to safe chars)
+        // Previous logic used: eta.replace(/-/g, '') -> YYYYMMDD
+        // User asked for "Ladijski razporedi"
+        const filename = `${etaFormatted.replace(/\./g, '')} - ${vessel} - ${type}.xlsx`;
+
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+        const fd = new FormData();
+        fd.append('file', blob, filename);
+        fd.append('vessel', vessel);
+        fd.append('type', type);
+
+        await fetch('/api/toyota/schedules/upload', { method: 'POST', body: fd });
     }
 </script>
 {% endblock %}

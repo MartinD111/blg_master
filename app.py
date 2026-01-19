@@ -3,6 +3,8 @@ import io
 from functools import wraps
 import os
 import datetime
+import uuid
+import json
 # from vw_utils import VWHSExtractor # Removed legacy
 from hs_utils import HSCodeExtractor
 from toyota_utils import ToyotaTrainProcessor
@@ -115,7 +117,7 @@ def index():
 # Mock route for all modules to visualize navigation
 # Module Hubs Data
 MODULES = {
-    'toyota': ['Kamioni', 'Ladje', 'Vagoni'],
+    'toyota': ['Kamioni', 'Ladje', 'Ladijski razporedi', 'Vagoni'],
     'volkswagen': ['Ladje', 'Carinjenje', 'DVH Helper/Tools', 'Stock', 'T2L', 'Kamioni', 'A.TR Extractor', 'Tramak'],
     'vagoni': ['Sledilnik', 'Railway Agency'],
     'others': ['Docs'],
@@ -399,6 +401,108 @@ def api_toyota_process_train():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# --- TOYOTA SHIP SCHEDULES MODULE ---
+
+SCHEDULES_FILE = 'data/toyota_schedules.json'
+
+def load_schedules():
+    if not os.path.exists(SCHEDULES_FILE): return []
+    try:
+        with open(SCHEDULES_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except: return []
+
+def save_schedules(data):
+    with open(SCHEDULES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2)
+
+@app.route('/toyota/schedules', endpoint='toyota_ship_schedules')
+@login_required
+def toyota_ship_schedules():
+    return render_spa('toyota_ship_schedules.html', user=session.get('user'))
+
+@app.route('/api/toyota/schedules', methods=['GET'])
+@login_required
+def api_toyota_schedules_list():
+    data = load_schedules()
+    # Sort by created_at desc
+    data.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    return jsonify(data)
+
+@app.route('/api/toyota/schedules/upload', methods=['POST'])
+@login_required
+def api_toyota_schedules_upload():
+    try:
+        file = request.files.get('file')
+        if not file: return jsonify({'error': 'No file'}), 400
+        
+        vessel = request.form.get('vessel', 'Unknown')
+        s_type = request.form.get('type', 'General') # PL, CZ, UA
+        filename = request.form.get('filename') or file.filename
+        
+        schedule_id = str(uuid.uuid4())
+        save_dir = os.path.join('data', 'toyota_schedules')
+        if not os.path.exists(save_dir): os.makedirs(save_dir)
+        
+        safe_name = f"{schedule_id}_{filename}"
+        file_path = os.path.join(save_dir, safe_name)
+        file.save(file_path)
+        
+        new_entry = {
+            "id": schedule_id,
+            "vessel": vessel,
+            "type": s_type,
+            "filename": filename,
+            "created_at": datetime.datetime.now().isoformat(),
+            "status": "active",
+            "path": file_path,
+            "original_filename": filename
+        }
+        
+        schedules = load_schedules()
+        schedules.append(new_entry)
+        save_schedules(schedules)
+        
+        return jsonify({'success': True, 'entry': new_entry})
+        
+    except Exception as e:
+        print(f"UPLOAD ERROR: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/toyota/schedules/archive', methods=['POST'])
+@login_required
+def api_toyota_schedules_archive():
+    try:
+        data = request.json
+        s_id = data.get('id')
+        schedules = load_schedules()
+        
+        for s in schedules:
+            if s['id'] == s_id:
+                s['status'] = 'archived'
+                # Optionally add archived_at
+                s['archived_at'] = datetime.datetime.now().isoformat()
+                save_schedules(schedules)
+                return jsonify({'success': True})
+                
+        return jsonify({'error': 'Schedule not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+        
+@app.route('/api/toyota/schedules/download/<s_id>')
+@login_required
+def api_toyota_schedules_download(s_id):
+    schedules = load_schedules()
+    entry = next((x for x in schedules if x['id'] == s_id), None)
+    if not entry or not os.path.exists(entry['path']):
+        return "File not found", 404
+        
+    return send_file(
+        entry['path'],
+        as_attachment=True,
+        download_name=entry['original_filename']
+    )
+
 @app.route('/profile')
 @login_required
 def profile():
@@ -529,6 +633,7 @@ def hub(name):
         ('toyota', 'T2L'): 't2l',
         ('toyota', 'Vagoni'): 'toyota_vagoni',
         ('toyota', 'Ladje'): 'toyota_damage_report',
+        ('toyota', 'Ladijski razporedi'): 'toyota_ship_schedules',
         ('volkswagen', 'Kamioni'): 'vw_kamioni_hub', # Updated to point to new default
     }
     

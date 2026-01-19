@@ -1,159 +1,172 @@
-<!DOCTYPE html>
-<html lang="sl" class="light">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toyota Vessel DVH Helper</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'] },
-                    colors: {
-                        toyota: { red: '#EB0A1E', dark: '#2d2d2d' },
-                        oneui: { cardLight: '#FFFFFF', cardDark: '#181818', surfaceLight: '#F2F4F8', surfaceDark: '#242424', primary: '#007AFF', textLight: '#000000', textDark: '#FFFFFF', subTextLight: '#8E8E93', subTextDark: '#98989D' }
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                },
+                colors: {
+                    toyota: {
+                        red: '#EB0A1E',
+                        dark: '#2d2d2d',
                     },
-                    borderRadius: { '4xl': '2.25rem', '5xl': '2.75rem', 'squircle': '32px' },
-                    boxShadow: { soft: '0 8px 40px rgba(0, 0, 0, 0.04)', hover: '0 12px 50px rgba(0, 0, 0, 0.08)', glow: '0 0 20px rgba(235, 10, 30, 0.4)' },
-                    backdropBlur: { xs: '2px' }
+                    oneui: {
+                        cardLight: '#FFFFFF',
+                        cardDark: '#1e263c',
+                        surfaceLight: '#F2F4F8',
+                        surfaceDark: '#0f172a',
+                        primary: '#007AFF',
+                        textLight: '#000000',
+                        textDark: '#FFFFFF',
+                        subTextLight: '#8E8E93',
+                        subTextDark: '#98989D'
+                    }
+                },
+                borderRadius: {
+                    '4xl': '2.25rem',
+                    '5xl': '2.75rem',
+                    'squircle': '32px'
+                },
+                boxShadow: {
+                    'soft': '0 8px 40px rgba(0, 0, 0, 0.04)',
+                    'hover': '0 12px 50px rgba(0, 0, 0, 0.08)',
+                    'glow': '0 0 20px rgba(235, 10, 30, 0.4)'
+                },
+                backdropBlur: {
+                    'xs': '2px',
                 }
             }
         }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    }
+</script>
 
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
+<!-- SheetJS -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+<!-- Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+        font-family: 'Inter', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar - Minimalist */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Animations */
+    .fade-enter {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
         }
+    }
 
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
+    .tap-effect:active {
+        transform: scale(0.96);
+    }
 
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
+    /* Helper for hidden elements */
+    .hidden-tab {
+        display: none !important;
+    }
 
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.15);
-        }
+    /* Table Styles - Clean */
+    th {
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
 
-        .fade-enter {
-            animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+    td {
+        font-variant-numeric: tabular-nums;
+    }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.98);
-            }
+    /* Glassmorphism utility */
+    .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
 
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
+    .dark .glass {
+        background: rgba(24, 24, 24, 0.7);
+    }
+</style>
 
-        .tap-effect:active {
-            transform: scale(0.96);
-        }
+<div
+    class="text-oneui-textLight dark:text-oneui-textDark transition-colors duration-500 min-h-screen flex flex-col pb-12 selection:bg-toyota-red selection:text-white">
 
-        .hidden-tab {
-            display: none !important;
-        }
-
-        th {
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-
-        td {
-            font-variant-numeric: tabular-nums;
-        }
-
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        .dark .glass {
-            background: rgba(24, 24, 24, 0.7);
-        }
-    </style>
-</head>
-
-<body
-    class="bg-gradient-to-br from-[#F9FAFB] to-[#FFF0F0] dark:from-[#000000] dark:to-[#1a0505] text-oneui-textLight dark:text-oneui-textDark transition-colors duration-500 min-h-screen flex flex-col pb-12 selection:bg-toyota-red selection:text-white bg-fixed">
+    <!-- Toast Notification -->
     <div id="toast"
         class="fixed bottom-10 left-1/2 transform -translate-x-1/2 translate-y-40 opacity-0 transition-all duration-500 z-50 bg-[#252525] dark:bg-[#333333] text-white pl-4 pr-6 py-3.5 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex items-center gap-4 min-w-[280px] border border-white/10">
         <div id="toastIcon" class="bg-white/10 p-1.5 rounded-full"></div>
         <p id="toastMessage" class="text-sm font-medium tracking-wide"></p>
     </div>
-    <header class="pt-4 pb-2 px-4 md:px-8 sticky top-0 z-40">
-        <div
-            class="glass rounded-[2rem] shadow-sm border border-white/20 dark:border-white/5 max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300">
-            <div class="flex items-center gap-4 w-full md:w-auto">
-                <div
-                    class="w-12 h-12 rounded-2xl bg-gradient-to-br from-toyota-red to-[#cc0000] text-white flex items-center justify-center shadow-lg shadow-red-500/20">
-                    <i data-lucide="ship" class="w-6 h-6"></i>
-                </div>
-                <div class="flex flex-col">
-                    <span
-                        class="text-[10px] font-bold tracking-[0.2em] text-oneui-subTextLight dark:text-oneui-subTextDark uppercase opacity-80">Logistics
-                        Hub</span>
-                    <h1 class="text-xl font-bold tracking-tight">Vessel Helper <span
-                            class="text-toyota-red text-xs align-top">1.0.0</span></h1>
-                </div>
-                <div class="flex items-center gap-2 md:hidden ml-auto">
-                    <button id="themeToggleMobile"
-                        class="w-10 h-10 rounded-full bg-oneui-surfaceLight dark:bg-oneui-surfaceDark flex items-center justify-center tap-effect">
-                        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    </button>
-                </div>
+
+    <!-- Header -->
+    <!-- Navigation Tabs (Only this stays) -->
+    <div class="max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-2">
+        <div class="bg-oneui-surfaceLight dark:bg-[#1a2236] p-1.5 rounded-full flex relative w-full md:w-auto overflow-hidden mx-auto shadow-sm"
+            style="max-width: 450px; border: 1px solid rgba(255,255,255,0.05);">
+            <div id="tabIndicator"
+                class="absolute top-1.5 left-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white dark:bg-[#2d3a5a] rounded-full shadow-sm transition-all duration-300 z-0 border dark:border-white/10">
             </div>
-            <div
-                class="bg-oneui-surfaceLight dark:bg-oneui-surfaceDark p-1.5 rounded-full flex relative w-full md:w-auto overflow-hidden">
-                <div id="tabIndicator"
-                    class="absolute top-1.5 left-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white dark:bg-[#333333] rounded-full shadow-sm transition-all duration-300 z-0">
-                </div>
-                <button onclick="switchMainTab('schedule')"
-                    class="flex-1 md:w-44 py-2.5 rounded-full text-sm font-bold relative z-10 transition-colors duration-300 text-black dark:text-white"
-                    id="btnSched">Ladijski Razporedi</button>
-                <button onclick="switchMainTab('diz')"
-                    class="flex-1 md:w-44 py-2.5 rounded-full text-sm font-bold relative z-10 transition-colors duration-300 text-gray-500 dark:text-gray-400"
-                    id="btnDiz">Razdelilec DIZ</button>
-            </div>
-            <div class="hidden md:flex items-center gap-3">
-                <button id="langToggle"
-                    class="h-11 px-6 rounded-full text-xs font-bold bg-oneui-surfaceLight dark:bg-oneui-surfaceDark hover:bg-gray-200 dark:hover:bg-gray-700 transition-all tap-effect">SLO</button>
-                <button id="themeToggle"
-                    class="w-11 h-11 rounded-full bg-oneui-surfaceLight dark:bg-oneui-surfaceDark hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-all tap-effect">
-                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                </button>
-            </div>
+            <button onclick="switchMainTab('schedule')"
+                class="flex-1 md:w-44 py-2.5 rounded-full text-sm font-bold relative z-10 transition-colors duration-300 text-black dark:text-white"
+                id="btnSched" data-i18n="navSchedule">
+                Ladijski Razporedi
+            </button>
+            <button onclick="switchMainTab('diz')"
+                class="flex-1 md:w-44 py-2.5 rounded-full text-sm font-bold relative z-10 transition-colors duration-300 text-gray-500 dark:text-gray-400"
+                id="btnDiz" data-i18n="navDiz">
+                Textpad Splitter
+            </button>
         </div>
-    </header>
+    </div>
+
+    <!-- Main Content -->
     <main class="flex-grow w-full max-w-7xl mx-auto px-4 md:px-6 py-6 relative">
+
+        <!-- ======================= TAB 1: SCHEDULE ======================= -->
         <div id="tabContentSchedule" class="fade-enter block">
+
+            <!-- INPUT SECTION -->
             <div
-                class="bg-oneui-cardLight dark:bg-oneui-cardDark rounded-[2.5rem] shadow-soft p-1 transition-all duration-200 mb-8 border border-white dark:border-gray-800">
+                class="bg-oneui-cardLight dark:bg-oneui-cardDark rounded-[2.5rem] shadow-soft p-1 transition-all duration-300 mb-8 border border-white dark:border-gray-800">
                 <div class="p-6 md:p-10">
                     <div class="flex items-center gap-4 mb-8">
                         <div
@@ -161,17 +174,19 @@
                             <i data-lucide="layers" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold">Vnos Podatkov</h2>
+                            <h2 class="text-2xl font-bold" data-i18n="inputSectionTitle">Vnos Podatkov</h2>
                             <p class="text-sm text-oneui-subTextLight dark:text-oneui-subTextDark">Izpolni spodnja polja
                                 za generiranje poročila</p>
                         </div>
                     </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                         <div class="space-y-6">
+                            <!-- Input: Vessel -->
                             <div class="group">
                                 <label
-                                    class="text-xs font-bold text-oneui-subTextLight dark:text-oneui-subTextDark uppercase ml-5 mb-2 block tracking-wider">Ime
-                                    Ladje</label>
+                                    class="text-xs font-bold text-oneui-subTextLight dark:text-oneui-subTextDark uppercase ml-5 mb-2 block tracking-wider"
+                                    data-i18n="vesselName">Ime Ladje</label>
                                 <div class="relative transition-all duration-300 group-focus-within:scale-[1.01]">
                                     <input type="text" id="vesselName" list="vesselList" placeholder="NPIT, NPKF..."
                                         class="w-full bg-oneui-surfaceLight dark:bg-oneui-surfaceDark border-none rounded-3xl py-5 px-7 text-lg font-bold focus:ring-0 outline-none transition-colors placeholder-gray-400">
@@ -186,16 +201,21 @@
                                     <option value="NEPTUNE THELISIS">NETH</option>
                                 </datalist>
                             </div>
+                            <!-- Input: ETA -->
                             <div class="group">
                                 <label
-                                    class="text-xs font-bold text-oneui-subTextLight dark:text-oneui-subTextDark uppercase ml-5 mb-2 block tracking-wider">ETA</label>
+                                    class="text-xs font-bold text-oneui-subTextLight dark:text-oneui-subTextDark uppercase ml-5 mb-2 block tracking-wider"
+                                    data-i18n="eta">ETA</label>
                                 <div class="relative transition-all duration-300 group-focus-within:scale-[1.01]">
                                     <input type="date" id="eta"
                                         class="w-full bg-oneui-surfaceLight dark:bg-oneui-surfaceDark border-none rounded-3xl py-5 px-7 text-lg font-bold focus:ring-0 outline-none transition-colors dark:[color-scheme:dark] text-gray-800 dark:text-gray-200">
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Drop Zones -->
                         <div class="space-y-4">
+                            <!-- Master File -->
                             <div id="dropZoneMaster"
                                 class="relative group cursor-pointer h-24 flex items-center bg-oneui-surfaceLight dark:bg-oneui-surfaceDark rounded-[2rem] border-2 border-transparent hover:border-toyota-red/20 hover:bg-white dark:hover:bg-[#2a2a2a] transition-all px-8 tap-effect">
                                 <input type="file" id="masterFile" accept=".xlsx, .xls, .csv, .xla" class="hidden">
@@ -217,6 +237,8 @@
                                         class="w-6 h-6 text-green-500 opacity-0 transition-all scale-50"></i>
                                 </div>
                             </div>
+
+                            <!-- UA File -->
                             <div id="dropZoneUA"
                                 class="relative group cursor-pointer h-24 flex items-center bg-oneui-surfaceLight dark:bg-oneui-surfaceDark rounded-[2rem] border-2 border-transparent hover:border-blue-500/20 hover:bg-white dark:hover:bg-[#2a2a2a] transition-all px-8 tap-effect">
                                 <input type="file" id="uaFile" accept=".xlsx, .xls, .csv, .xla" class="hidden">
@@ -240,11 +262,13 @@
                             </div>
                         </div>
                     </div>
+
                     <button onclick="processFiles()"
                         class="w-full bg-black dark:bg-white text-white dark:text-black py-5 rounded-[2rem] font-bold text-lg hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-none hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
                         <i data-lucide="sparkles" class="w-5 h-5"></i>
                         <span data-i18n="processBtn">Obdelaj Podatke</span>
                     </button>
+
                     <div id="errorMsg"
                         class="hidden mt-6 p-4 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-300 rounded-3xl text-sm font-medium flex items-center gap-3 animate-pulse border border-red-100 dark:border-red-900/20">
                         <i data-lucide="alert-octagon" class="w-5 h-5"></i>
@@ -252,99 +276,126 @@
                     </div>
                 </div>
             </div>
+
+            <!-- EXPORT & PREVIEW -->
             <div id="exportContainer" class="hidden fade-enter space-y-6">
-                <div
-                    class="bg-oneui-cardLight dark:bg-oneui-cardDark rounded-[2.5rem] shadow-soft p-8 border border-white dark:border-gray-800">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                        <div class="flex items-center gap-4 w-full md:w-auto">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600">
-                                <i data-lucide="list-checks" class="w-6 h-6"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-xl font-bold" data-i18n="acarSectionTitle">A-CAR List</h2>
-                                <div id="acarStats" class="text-xs text-gray-400 font-medium"></div>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 w-full md:w-auto">
-                            <button onclick="copyACar('VIN')"
-                                class="flex-1 md:flex-none px-6 py-3 rounded-full bg-oneui-surfaceLight dark:bg-[#2C2C2C] text-sm font-bold hover:bg-gray-200 dark:hover:bg-[#3D3D3D] transition-all tap-effect"><span
-                                    data-i18n="btnCopyVin">Kopiraj VIN</span></button>
-                            <button onclick="copyACar('DEST')"
-                                class="flex-1 md:flex-none px-6 py-3 rounded-full bg-oneui-surfaceLight dark:bg-[#2C2C2C] text-sm font-bold hover:bg-gray-200 dark:hover:bg-[#3D3D3D] transition-all tap-effect"><span
-                                    data-i18n="btnCopyDest">Kopiraj Dest.</span></button>
-                        </div>
-                    </div>
-                    <div class="overflow-hidden rounded-[1.5rem] border border-gray-100 dark:border-gray-800">
-                        <div class="overflow-auto custom-scrollbar max-h-[350px]">
-                            <table class="w-full text-sm text-left" id="tableACar">
-                                <thead class="bg-gray-50 dark:bg-[#222] sticky top-0 z-10">
-                                    <tr>
-                                        <th class="px-6 py-4 font-bold text-gray-500 uppercase text-xs w-20">#</th>
-                                        <th class="px-6 py-4 font-bold text-gray-500 uppercase text-xs">VIN</th>
-                                        <th class="px-6 py-4 font-bold text-gray-500 uppercase text-xs">Destination</th>
-                                    </tr>
-                                </thead>
-                                <tbody
-                                    class="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-oneui-cardDark">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div
-                    class="bg-oneui-cardLight dark:bg-oneui-cardDark rounded-[2.5rem] shadow-soft p-6 md:p-12 border border-white dark:border-gray-800">
-                    <div class="text-center mb-12">
-                        <div
-                            class="w-20 h-20 rounded-[2rem] bg-gray-100 dark:bg-[#222] flex items-center justify-center text-gray-900 dark:text-white mx-auto mb-6 shadow-inner">
-                            <i data-lucide="file-text" class="w-10 h-10"></i>
-                        </div>
-                        <h2 class="text-3xl font-bold mb-3 tracking-tight" data-i18n="dizTitle">DIZ Obdelava</h2>
-                        <p class="text-gray-500 text-sm md:text-base max-w-md mx-auto" data-i18n="dizSubtitle">Naloži
-                            .txt datoteko za avtomatsko grupiranje in izračun teže</p>
-                    </div>
-                    <div id="dropZoneTxt"
-                        class="relative group cursor-pointer h-56 flex items-center justify-center bg-oneui-surfaceLight dark:bg-[#222] rounded-[2.5rem] border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-toyota-red hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-300 tap-effect">
-                        <input type="file" id="txtFile" accept=".txt" class="hidden">
-                        <div id="txtDefault" class="text-center">
-                            <span class="block font-bold text-xl mb-2" data-i18n="dizDropTitle">Izberi Datoteko</span>
-                            <span class="text-sm text-gray-400" data-i18n="dizDropSub">Klikni ali povleci .txt
-                                sem</span>
-                        </div>
-                        <div id="txtSuccess" class="hidden flex-col items-center animate-bounce">
-                            <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mb-3"></i>
-                            <p id="txtFileName" class="font-bold text-xl"></p>
-                        </div>
-                    </div>
-                    <div id="dizResults" class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 hidden"></div>
-                </div>
+                <!-- Placeholder for export results -->
+                <p class="text-center text-gray-500">Export functionality will appear here after processing</p>
             </div>
         </div>
-        <div id="tabContentDiz" class="hidden-tab fade-enter"></div>
+
+        <!-- ======================= TAB 2: DIZ ======================= -->
+        <div id="tabContentDiz" class="hidden-tab fade-enter">
+            <div
+                class="bg-oneui-cardLight dark:bg-oneui-cardDark rounded-[2.5rem] shadow-soft p-6 md:p-12 border border-white dark:border-gray-800">
+                <div class="text-center mb-12">
+                    <div
+                        class="w-20 h-20 rounded-[2rem] bg-gray-100 dark:bg-[#222] flex items-center justify-center text-gray-900 dark:text-white mx-auto mb-6 shadow-inner">
+                        <i data-lucide="file-text" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-3 tracking-tight" data-i18n="dizTitle">DIZ Obdelava</h2>
+                    <p class="text-gray-500 text-sm md:text-base max-w-md mx-auto" data-i18n="dizSubtitle">Naloži .txt
+                        datoteko za avtomatsko grupiranje in izračun teže</p>
+                </div>
+
+                <div id="dropZoneTxt"
+                    class="relative group cursor-pointer h-56 flex items-center justify-center bg-oneui-surfaceLight dark:bg-[#222] rounded-[2.5rem] border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-toyota-red hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-300 tap-effect">
+                    <input type="file" id="txtFile" accept=".txt" class="hidden">
+                    <div id="txtDefault" class="text-center">
+                        <span class="block font-bold text-xl mb-2" data-i18n="dizDropTitle">Izberi Datoteko</span>
+                        <span class="text-sm text-gray-400" data-i18n="dizDropSub">Klikni ali povleci .txt sem</span>
+                    </div>
+                    <div id="txtSuccess" class="hidden flex-col items-center animate-bounce">
+                        <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mb-3"></i>
+                        <p id="txtFileName" class="font-bold text-xl"></p>
+                    </div>
+                </div>
+
+                <div id="dizResults" class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 hidden"></div>
+            </div>
+        </div>
+
     </main>
+
     <script>
-        const translations = { sl: { navSchedule: "Ladijski Razporedi", navDiz: "Razdelilec DIZ", inputSectionTitle: "Vnos Podatkov", acarSectionTitle: "A-CAR Seznam", vesselName: "Ime Ladje", eta: "ETA", processBtn: "Obdelaj Podatke", download: "Prenesi Excel", btnCopyVin: "Kopiraj Šasije", btnCopyDest: "Kopiraj Dest.", errorVessel: "Prosim vnesite ime ladje!", errorMaster: "Prosim naložite Master File!", errorReading: "Napaka pri branju datoteke: ", acarTotal: "SKUPAJ VOZIL", dragDropText: "Klikni ali povleci", toastError: "Napaka", toastSuccess: "Uspeh", toastNoData: "Ni podatkov!", toastCopySuccess: "kopirano!", toastCopyFail: "Napaka kopiranja.", dizDownload: "Prenesi .txt", dizTitle: "DIZ Obdelava", dizSubtitle: "Naloži .txt datoteko za avtomatsko grupiranje", dizDropTitle: "Izberi Datoteko", dizDropSub: "Klikni ali povleci .txt sem", statTotalWeight: "Skupna Teža" }, en: { navSchedule: "Vessel Schedules", navDiz: "DIZ Splitter", inputSectionTitle: "Data Input", acarSectionTitle: "A-CAR List", vesselName: "Vessel Name", eta: "ETA", processBtn: "Process Data", download: "Download Excel", btnCopyVin: "Copy VINs", btnCopyDest: "Copy Dest.", errorVessel: "Enter Vessel Name!", errorMaster: "Upload Master File!", errorReading: "Error reading file: ", acarTotal: "TOTAL VEHICLES", dragDropText: "Click or Drag", toastError: "Error", toastSuccess: "Success", toastNoData: "No data!", toastCopySuccess: "copied!", toastCopyFail: "Copy failed.", dizDownload: "Download .txt", dizTitle: "DIZ Processing", dizSubtitle: "Upload .txt file for automatic grouping", dizDropTitle: "Select File", dizDropSub: "Click or drag .txt here", statTotalWeight: "Total Weight" } };
+        // --- PREVODI ---
+        const translations = {
+            sl: {
+                navSchedule: "Ladijski Razporedi",
+                navDiz: "Textpad Splitter",
+                inputSectionTitle: "Vnos Podatkov",
+                vesselName: "Ime Ladje",
+                eta: "ETA",
+                processBtn: "Obdelaj Podatke",
+                dragDropText: "Klikni ali povleci",
+                dizTitle: "DIZ Obdelava",
+                dizSubtitle: "Naloži .txt datoteko za avtomatsko grupiranje",
+                dizDropTitle: "Izberi Datoteko",
+                dizDropSub: "Klikni ali povleci .txt sem"
+            },
+            en: {
+                navSchedule: "Vessel Schedules",
+                navDiz: "Textpad Splitter",
+                inputSectionTitle: "Data Input",
+                vesselName: "Vessel Name",
+                eta: "ETA",
+                processBtn: "Process Data",
+                dragDropText: "Click or Drag",
+                dizTitle: "DIZ Processing",
+                dizSubtitle: "Upload .txt file for automatic grouping",
+                dizDropTitle: "Select File",
+                dizDropSub: "Click or drag .txt here"
+            }
+        };
+
         let currentLang = 'sl';
-        const toast = document.getElementById('toast');
-        function showToast(t, m) { toast.classList.remove('opacity-0', 'translate-y-40'); document.getElementById('toastMessage').innerHTML = `<span class="font-bold opacity-70 mr-2 text-blue-400">${t}</span>${m}`; setTimeout(() => toast.classList.add('opacity-0', 'translate-y-40'), 3000); }
-        function switchMainTab(tab) { const btnSched = document.getElementById('btnSched'); const btnDiz = document.getElementById('btnDiz'); const contentSched = document.getElementById('tabContentSchedule'); const contentDiz = document.getElementById('tabContentDiz'); const indicator = document.getElementById('tabIndicator'); btnSched.classList.remove('text-black', 'dark:text-white'); btnSched.classList.add('text-gray-500', 'dark:text-gray-400'); btnDiz.classList.remove('text-black', 'dark:text-white'); btnDiz.classList.add('text-gray-500', 'dark:text-gray-400'); if (tab === 'schedule') { contentSched.classList.remove('hidden-tab'); contentDiz.classList.add('hidden-tab'); btnSched.classList.remove('text-gray-500', 'dark:text-gray-400'); btnSched.classList.add('text-black', 'dark:text-white'); indicator.style.transform = 'translateX(0)'; } else { contentDiz.classList.remove('hidden-tab'); contentSched.classList.add('hidden-tab'); btnDiz.classList.remove('text-gray-500', 'dark:text-gray-400'); btnDiz.classList.add('text-black', 'dark:text-white'); indicator.style.transform = 'translateX(100%) translateX(6px)'; } }
-        function processFiles() {/* implementation omitted for brevity – same as original script */ }
-        function switchTab(tabId) { ['PL', 'CZ', 'UA'].forEach(t => { document.getElementById('tab' + t).classList.toggle('bg-white', t === tabId); document.getElementById('view' + t).classList.toggle('hidden-tab', t !== tabId); }); }
-        function copyACar(type) {/* copy logic */ }
-        function copyFormattedWeight(w) {/* copy logic */ }
-        function setupDownloadBtn(bid, type, data, headers) {/* download logic */ }
-        function renderTable(tid, data, cols) {/* render logic */ }
-        function renderACarTable(data) {/* render logic */ }
-        function updateStats(q, w, d) {/* update logic */ }
-        function updateACarStats(d) {/* update logic */ }
-        function showError(m) { document.getElementById('errorText').textContent = m; document.getElementById('errorMsg').classList.remove('hidden'); }
-        function updateTranslations() { document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (translations[currentLang][key]) el.textContent = translations[currentLang][key]; }); }
-        document.getElementById('langToggle').addEventListener('click', () => { currentLang = currentLang === 'sl' ? 'en' : 'sl'; document.getElementById('langToggle').textContent = currentLang.toUpperCase(); updateTranslations(); });
-        document.getElementById('themeToggle').addEventListener('click', () => { document.documentElement.classList.toggle('dark'); });
-        document.getElementById('themeToggleMobile').addEventListener('click', () => { document.documentElement.classList.toggle('dark'); });
         lucide.createIcons();
+
+        // --- TAB SWITCHER ---
+        function switchMainTab(tab) {
+            const btnSched = document.getElementById('btnSched');
+            const btnDiz = document.getElementById('btnDiz');
+            const contentSched = document.getElementById('tabContentSchedule');
+            const contentDiz = document.getElementById('tabContentDiz');
+            const indicator = document.getElementById('tabIndicator');
+
+            // Reset text colors
+            btnSched.classList.remove('text-black', 'dark:text-white');
+            btnSched.classList.add('text-gray-500', 'dark:text-gray-400');
+            btnDiz.classList.remove('text-black', 'dark:text-white');
+            btnDiz.classList.add('text-gray-500', 'dark:text-gray-400');
+
+            if (tab === 'schedule') {
+                contentSched.classList.remove('hidden-tab');
+                contentDiz.classList.add('hidden-tab');
+                btnSched.classList.remove('text-gray-500', 'dark:text-gray-400');
+                btnSched.classList.add('text-black', 'dark:text-white');
+                indicator.style.transform = 'translateX(0)';
+            } else {
+                contentDiz.classList.remove('hidden-tab');
+                contentSched.classList.add('hidden-tab');
+                btnDiz.classList.remove('text-gray-500', 'dark:text-gray-400');
+                btnDiz.classList.add('text-black', 'dark:text-white');
+                indicator.style.transform = 'translateX(100%) translateX(6px)';
+            }
+        }
+
+        // Initial theme check (managed by main app, but keeping for local state if needed)
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+
+        function updateTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) el.textContent = translations[currentLang][key];
+            });
+        }
+
+        // Placeholder for processFiles function
+        function processFiles() {
+            alert('Processing functionality to be implemented');
+        }
+
         updateTranslations();
     </script>
-</body>
-
-</html>
+</div>
+{% endblock %}

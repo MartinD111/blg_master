@@ -36,17 +36,6 @@
         "archived": false
     },
     {
-        "id": "1768747617.709974",
-        "title": "test 2",
-        "category": "Volkswagen",
-        "description": "",
-        "status": "todo",
-        "assignees": [],
-        "created_by": "admin",
-        "created_at": "2026-01-18T15:46:57.710044",
-        "archived": false
-    },
-    {
         "id": "1768749710.419765",
         "title": "Verification Task",
         "category": "Toyota",
@@ -73,34 +62,6 @@
         "due_date": "",
         "created_by": "admin",
         "created_at": "2026-01-18T16:54:00.698111",
-        "archived": false
-    },
-    {
-        "id": "1768751710.62906",
-        "title": "New Task",
-        "category": "Others",
-        "description": "",
-        "status": "todo",
-        "assignees": [
-            "admin"
-        ],
-        "due_date": "",
-        "created_by": "admin",
-        "created_at": "2026-01-18T16:55:10.629325",
-        "archived": false
-    },
-    {
-        "id": "1768751791.231875",
-        "title": "New Task",
-        "category": "Others",
-        "description": "",
-        "status": "todo",
-        "assignees": [
-            "admin"
-        ],
-        "due_date": "",
-        "created_by": "admin",
-        "created_at": "2026-01-18T16:56:31.232001",
         "archived": false
     },
     {
@@ -150,20 +111,6 @@
                 "completed": false
             }
         ]
-    },
-    {
-        "id": "1768753130.126023",
-        "title": "New Task",
-        "category": "Others",
-        "description": "",
-        "status": "todo",
-        "assignees": [
-            "admin"
-        ],
-        "due_date": "",
-        "created_by": "admin",
-        "created_at": "2026-01-18T17:18:50.126038",
-        "archived": false
     },
     {
         "id": "1768753168.820967",
