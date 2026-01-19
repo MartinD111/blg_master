@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+    <script>
+        // Immediately apply theme to avoid FOUC
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BLG Master</title>
@@ -31,47 +39,68 @@
                     <!-- 1. PROJECTS (New) -->
                     <li class="nav-item">
                         <a href="{{ url_for('projects_board') }}" class="nav-link">
-                            <i class="fas fa-layer-group" style="margin-right: 5px;"></i> Projects
+                            <i class="fas fa-layer-group" style="margin-right: 6px;"></i> Projects
                         </a>
                     </li>
 
                     <!-- 2. Toyota -->
                     <li class="nav-item">
-                        <a href="{{ url_for('hub', name='toyota') }}" class="nav-link">
+                        <a href="{{ url_for('hub', name='toyota') }}" class="nav-link display-flex align-center">
+                            <!-- Toyota Logo SVG -->
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="margin-right: 6px;">
+                                <ellipse cx="12" cy="12" rx="10" ry="6"></ellipse>
+                                <path d="M2 12C2 12 5 8 12 8C19 8 22 12 22 12"></path>
+                                <path d="M12 12V8"></path>
+                                <ellipse cx="12" cy="12" rx="3" ry="6"></ellipse>
+                            </svg>
                             Toyota
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="dropdown-item"><a href="{{ url_for('t2l', brand='toyota') }}"
-                                    class="dropdown-link"><i class="fas fa-list"></i> T2L - ATT.Lista</a></li>
 
-                            <!-- Toyota Vessel Section -->
-                            <div
-                                class="dropdown-divider text-xs font-bold text-gray-400 px-4 py-1 uppercase tracking-wider">
-                                Toyota Vessel
-                            </div>
-                            <li class="dropdown-item">
-                                {# <a href="{{ url_for('toyota_vessel_hub') }}" class="dropdown-link"> #}
-                                    <a href="#" class="dropdown-link">
-                                        <i class="fas fa-ship"></i> Vessel Hub
-                                    </a>
-                            </li>
-                            <li class="dropdown-item">
-                                <a href="{{ url_for('toyota_damage_report') }}" class="dropdown-link">
-                                    <i class="fas fa-exclamation-triangle"></i> Damage Report
+
+                            <!-- Toyota Vessel Section (Grouped as Flyout) -->
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">
+                                    <i class="fas fa-ship"></i> Toyota Vessel
                                 </a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item">
+                                        {# <a href="{{ url_for('toyota_vessel_hub') }}" class="dropdown-link"> #}
+                                            <a href="#" class="dropdown-link">
+                                                <i class="fas fa-anchor"></i> Vessel Hub
+                                            </a>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('toyota_ship_schedules') }}" class="dropdown-link">
+                                            <i class="fas fa-calendar-alt"></i> Ladijski razporedi
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-item"><a href="{{ url_for('t2l', brand='toyota') }}"
+                                            class="dropdown-link"><i class="fas fa-list"></i> T2L - ATT.Lista</a></li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('toyota_damage_report') }}" class="dropdown-link">
+                                            <i class="fas fa-car-crash"></i> Damage Report
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('toyota_dvh_helper') }}" class="dropdown-link">
+                                            <i class="fas fa-tools"></i> DVH Helper
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('toyota_diz_splitter') }}" class="dropdown-link">
+                                            <i class="fas fa-project-diagram"></i> DIZ Splitter
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('toyota_customs') }}" class="dropdown-link">
+                                            <i class="fas fa-file-contract"></i> Customs Helper
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
-                            <li class="dropdown-item">
-                                <a href="{{ url_for('toyota_dvh_helper') }}" class="dropdown-link">
-                                    <i class="fas fa-tools"></i> DVH Helper
-                                </a>
-                            </li>
-                            <li class="dropdown-item">
-                                <a href="{{ url_for('toyota_diz_splitter') }}" class="dropdown-link">
-                                    <i class="fas fa-cubes"></i> DIZ Splitter
-                                </a>
-                            </li>
-                            <li class="dropdown-item"><a href="{{ url_for('toyota_customs') }}" class="dropdown-link"><i
-                                        class="fas fa-file-contract"></i> Customs Helper</a></li>
 
                             <!-- Other -->
                             <div class="dropdown-divider border-t border-gray-700 my-1"></div>
@@ -80,55 +109,93 @@
                                     Vagoni</a></li>
                             <li class="dropdown-item"><a href="#" class="dropdown-link"><i class="fas fa-truck"></i>
                                     Kamioni</a></li>
-                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i
-                                        class="fas fa-exchange-alt"></i> Tramak</a></li>
+
                         </ul>
                     </li>
 
                     <!-- 3. Volkswagen (Simplified) -->
                     <li class="nav-item">
-                        <a href="{{ url_for('hub', name='volkswagen') }}" class="nav-link">
+                        <a href="{{ url_for('hub', name='volkswagen') }}" class="nav-link display-flex align-center">
+                            <!-- VW Logo SVG -->
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="margin-right: 6px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M4.5 11.5L9 20L12 11.5L15 20L19.5 11.5"></path>
+                                <path d="M12 11.5V20"></path>
+                            </svg>
                             Volkswagen
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="dropdown-item">
-                                <a href="{{ url_for('vw_stock') }}" class="dropdown-link">
-                                    <i class="fas fa-cubes"></i> Stock Report
-                                </a>
-                            </li>
+
                             <li class="dropdown-item">
                                 <a href="{{ url_for('vw_carinjenje') }}" class="dropdown-link">
                                     <i class="fas fa-file-contract"></i> Carinjenje
                                 </a>
                             </li>
-                            <li class="dropdown-item">
-                                <a href="{{ url_for('t2l', brand='volkswagen') }}" class="dropdown-link">
-                                    <i class="fas fa-list"></i> T2L List
-                                </a>
-                            </li>
-                            <div class="dropdown-divider border-t border-gray-700 my-1 mx-2"></div>
-                            <li class="dropdown-item">
+                            <!-- VW Vessel Flyout -->
+                            <li class="dropdown-item has-children">
                                 <a href="#" class="dropdown-link">
-                                    <i class="fas fa-ship"></i> Ladje (Ships)
+                                    <i class="fas fa-ship"></i> Volkswagen Vessel
                                 </a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item">
+                                        <a href="#" class="dropdown-link">
+                                            <i class="fas fa-anchor"></i> Ladje (Ships)
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('t2l', brand='volkswagen') }}" class="dropdown-link">
+                                            <i class="fas fa-list"></i> T2L List
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('vw_dvh_helper') }}" class="dropdown-link">
+                                            <i class="fas fa-tools"></i> DVH Helper
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
-                            <li class="dropdown-item">
-                                <a href="{{ url_for('vw_kamioni_hub') }}" class="dropdown-link">
-                                    <i class="fas fa-truck"></i> Kamioni (Trucks)
+
+                            <!-- VW Trucks Section (Flyout) -->
+                            <li class="dropdown-item has-children">
+                                <a href="#" class="dropdown-link">
+                                    <i class="fas fa-truck"></i> Volkswagen Trucks
                                 </a>
+                                <ul class="flyout-menu">
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('vw_announce') }}" class="dropdown-link">
+                                            <i class="fas fa-bullhorn"></i> Najava (Announcement)
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('vw_verify') }}" class="dropdown-link">
+                                            <i class="fas fa-check-double"></i> ACAR Verification
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('vw_stock') }}" class="dropdown-link">
+                                            <i class="fas fa-cubes"></i> Stock Report
+                                        </a>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <a href="{{ url_for('vw_diz') }}" class="dropdown-link">
+                                            <i class="fas fa-project-diagram"></i> DIZ Splitter
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
-                            <li class="dropdown-item">
-                                <a href="{{ url_for('vw_dvh_helper') }}" class="dropdown-link">
-                                    <i class="fas fa-tools"></i> DVH Helper
-                                </a>
-                            </li>
+
+                            <li class="dropdown-item"><a href="#" class="dropdown-link"><i
+                                        class="fas fa-exchange-alt"></i> Tramak</a></li>
+
                         </ul>
                     </li>
 
                     <!-- 4. Others -->
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            Others
+                            <i class="fas fa-box-open" style="margin-right: 6px;"></i> Others
                         </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-item"><a href="#" class="dropdown-link"><i class="fas fa-file-alt"></i>
@@ -141,7 +208,7 @@
                     <!-- 5. e-CMR Manager -->
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            e-CMR Manager
+                            <i class="fas fa-shipping-fast" style="margin-right: 6px;"></i> e-CMR Manager
                         </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-item"><a href="#" class="dropdown-link"><i
@@ -152,7 +219,7 @@
                     <!-- 6. Vagoni (General) -->
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            Vagoni
+                            <i class="fas fa-train" style="margin-right: 6px;"></i> Vagoni
                         </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-item"><a href="#" class="dropdown-link"><i
@@ -165,7 +232,7 @@
                     <!-- 7. Statistika -->
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            Statistika
+                            <i class="fas fa-chart-pie" style="margin-right: 6px;"></i> Statistika
                         </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-item"><a href="#" class="dropdown-link"><i class="fas fa-chart-bar"></i>
@@ -176,7 +243,7 @@
                     <!-- 8. Fakture -->
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            Fakture
+                            <i class="fas fa-file-invoice-dollar" style="margin-right: 6px;"></i> Fakture
                         </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-item"><a href="#" class="dropdown-link"><i
@@ -188,7 +255,7 @@
                     {% if user.role == 'admin' %}
                     <li class="nav-item">
                         <a href="#" class="nav-link" style="color: #ff9999;">
-                            Admin Panel
+                            <i class="fas fa-user-shield" style="margin-right: 6px;"></i> Admin Panel
                         </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-item">
