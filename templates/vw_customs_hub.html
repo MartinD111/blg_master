@@ -1,57 +1,126 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <div class="mb-8 text-center">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Volkswagen Customs Hub</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">Select a tool to proceed</p>
+<!-- Tailwind Configuration for this tool -->
+<script>
+    window.tailwind = window.tailwind || {};
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                fontFamily: { sans: ['Inter', 'sans-serif'] },
+                colors: {
+                    surface: { light: '#f2f4f7', dark: '#0b0b0b', card: '#ffffff', cardDark: '#1c1c1e' },
+                    primary: { DEFAULT: '#0050d5', dark: '#5c9dff' }
+                }
+            }
+        }
+    }
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+    /* Explicit dark mode text colors to bypass any tailwind race conditions */
+    .dark h1,
+    .dark h3 {
+        color: #ffffff !important;
+    }
+
+    .dark p {
+        color: #f3f4f6 !important;
+        opacity: 1 !important;
+    }
+
+    .icon-box {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .group:hover .icon-box {
+        transform: scale(1.1) translateY(-5px);
+        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.3);
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 2.5rem;
+    }
+
+    .dark .glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+</style>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 selection:bg-primary selection:text-white">
+
+    <div class="mb-20 text-center">
+        <h1 class="text-5xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight mb-6">
+            Volkswagen Customs Hub
+        </h1>
+        <p class="text-gray-600 dark:text-gray-100 text-xl font-medium">
+            Select specialized tool for import procedures
+        </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
 
-        <!-- Customs Helper -->
+        <!-- Customs Helper - BLUE -->
         <a href="{{ url_for('vw_customs_helper_tool') }}"
-            class="group relative bg-white dark:bg-white/5 rounded-[2rem] p-8 border border-gray-100 dark:border-white/10 hover:border-blue-500/30 hover:shadow-2xl transition-all text-center overflow-hidden">
+            class="glass-card group relative p-10 transition-all text-center overflow-hidden hover:border-blue-500/50 hover:shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)]">
             <div
-                class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
             </div>
+
             <div
-                class="w-16 h-16 bg-blue-100 dark:bg-blue-900/20 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform">
+                class="icon-box w-24 h-24 bg-blue-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-10 text-4xl shadow-[0_15px_30px_-5px_rgba(59,130,246,0.5)]">
                 <i class="fas fa-wrench"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Customs Helper</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">General customs declarations and T2L processing helper.
+
+            <h3 class="text-2xl font-bold mb-4">Customs Helper</h3>
+            <p class="text-base leading-relaxed opacity-100">
+                General customs declarations, T2L processing and cargo manifests helper.
             </p>
         </a>
 
-        <!-- ATR Extractor -->
+        <!-- ATR Extractor - TEAL/CYAN -->
         <a href="{{ url_for('vw_atr_tool') }}"
-            class="group relative bg-white dark:bg-white/5 rounded-[2rem] p-8 border border-gray-100 dark:border-white/10 hover:border-indigo-500/30 hover:shadow-2xl transition-all text-center overflow-hidden">
+            class="glass-card group relative p-10 transition-all text-center overflow-hidden hover:border-cyan-500/50 hover:shadow-[0_0_50px_-12px_rgba(6,182,212,0.3)]">
             <div
-                class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
             </div>
+
             <div
-                class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/20 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform">
+                class="icon-box w-24 h-24 bg-cyan-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-10 text-4xl shadow-[0_15px_30px_-5px_rgba(6,182,212,0.5)]">
                 <i class="fas fa-file-contract"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">A.TR Extractor</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Extract data from A.TR documents using OCR/Parsing.</p>
+
+            <h3 class="text-2xl font-bold mb-4">A.TR Extractor</h3>
+            <p class="text-base leading-relaxed opacity-100">
+                Automated data extraction from A.TR documents using intelligent OCR parsing.
+            </p>
         </a>
 
-        <!-- HS Code -->
+        <!-- HS Code Tool - PURPLE -->
         <a href="{{ url_for('vw_hs_tool') }}"
-            class="group relative bg-white dark:bg-white/5 rounded-[2rem] p-8 border border-gray-100 dark:border-white/10 hover:border-purple-500/30 hover:shadow-2xl transition-all text-center overflow-hidden">
+            class="glass-card group relative p-10 transition-all text-center overflow-hidden hover:border-purple-500/50 hover:shadow-[0_0_50px_-12px_rgba(168,85,247,0.3)]">
             <div
-                class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
             </div>
+
             <div
-                class="w-16 h-16 bg-purple-100 dark:bg-purple-900/20 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform">
+                class="icon-box w-24 h-24 bg-purple-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-10 text-4xl shadow-[0_15px_30px_-5px_rgba(168,85,247,0.5)]">
                 <i class="fas fa-file-archive"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">HS Code Tool</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Analyze Excel/ZIP files to extract HS Codes and Packing
-                Lists.</p>
+
+            <h3 class="text-2xl font-bold mb-4">HS Code Tool</h3>
+            <p class="text-base leading-relaxed opacity-100">
+                Analyze Excel and ZIP archives to extract HS Codes and generate Packing Lists.
+            </p>
         </a>
 
     </div>

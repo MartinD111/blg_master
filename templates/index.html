@@ -12,6 +12,10 @@
             style="background: linear-gradient(135deg, var(--accent-color) 0%, #9b59b6 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3); font-weight: 600; font-size: 0.9rem;">
             <i class="fas fa-plus-minus"></i> Add/Remove
         </button>
+        <button onclick="openQuickAccessModal()" class="btn glass-btn"
+            style="background: linear-gradient(135deg, #FF9966 0%, #FF5E62 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(255, 94, 98, 0.3); font-weight: 600; font-size: 0.9rem;">
+            <i class="fas fa-star"></i> Quick Access
+        </button>
         <button id="rearrangeBtn" onclick="toggleRearrangeMode()" class="btn glass-btn"
             style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 10px 20px; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); font-weight: 600; font-size: 0.9rem;">
             <i class="fas fa-arrows-alt"></i> Re-arrange
@@ -87,6 +91,17 @@
                 <div style="color: var(--text-muted); font-size: 0.9rem;">Loading projects...</div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Quick Access Section -->
+<div id="quickAccessSection" class="glass-panel" style="margin-top: 20px; padding: 25px; display: none;">
+    <h3
+        style="margin: 0 0 20px 0; font-size: 1.1rem; color: var(--text-muted); display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-rocket" style="color: var(--accent-color);"></i> Quick Access
+    </h3>
+    <div id="quickAccessGrid" style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <!-- Pills go here -->
     </div>
 </div>
 
@@ -213,6 +228,40 @@
     </div>
 </div>
 
+<!-- Quick Access Modal -->
+<div id="quickAccessModal" class="modal-overlay"
+    style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;">
+    <div class="glass-panel"
+        style="width: 500px; max-width: 90%; padding: 0; overflow: hidden; transform: scale(0.9); transition: transform 0.3s;">
+
+        <div
+            style="padding: 20px 25px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 153, 102, 0.1);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="margin: 0; font-size: 1.1rem; color: #FF9966;"><i class="fas fa-star"
+                        style="margin-right: 10px;"></i>Quick Access</h3>
+                <span id="qaCount"
+                    style="font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px;">0/10</span>
+            </div>
+            <button onclick="closeQuickAccessModal()"
+                style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;"><i
+                    class="fas fa-times"></i></button>
+        </div>
+
+        <div style="padding: 0; max-height: 60vh; overflow-y: auto;">
+            <div id="qaList" style="padding: 25px; display: flex; flex-direction: column; gap: 20px;">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <div
+            style="padding: 20px; border-top: 1px solid var(--glass-border); text-align: right; background: rgba(0,0,0,0.1);">
+            <button onclick="saveQuickAccess()" class="pill-btn primary"
+                style="background: linear-gradient(135deg, #FF9966, #FF5E62); color: white; border: none; padding: 12px 30px; border-radius: 50px !important;">Save
+                Selection</button>
+        </div>
+    </div>
+</div>
+
 <!-- Rearrange Modal -->
 <div id="rearrangeModal" class="modal-overlay"
     style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;">
@@ -310,7 +359,319 @@
         // Load Mini Tasks and Projects
         loadMiniTasks();
         loadMyProjects();
+        loadQuickAccess();
     });
+
+    // === QUICK ACCESS LOGIC ===
+    let allModulesData = {};
+    let currentQA = [];
+
+    function loadQuickAccess() {
+        fetch('/api/user/settings')
+            .then(r => r.json())
+            .then(data => {
+                currentQA = data.quick_access || [];
+                renderQuickAccessSection(currentQA);
+            });
+    }
+
+    function renderQuickAccessSection(qaIds) {
+        const section = document.getElementById('quickAccessSection');
+        const grid = document.getElementById('quickAccessGrid');
+
+        if (!qaIds || qaIds.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        // We need module details. If we don't have them, fetch them first.
+        if (Object.keys(allModulesData).length === 0) {
+            fetch('/api/modules')
+                .then(r => r.json())
+                .then(data => {
+                    allModulesData = data;
+                    renderQuickAccessSection(qaIds);
+                });
+            return;
+        }
+
+        grid.innerHTML = '';
+        let count = 0;
+
+        // Flatten modules for easy lookup
+        const flatModules = {};
+        Object.values(allModulesData).flat().forEach(m => flatModules[m.id] = m);
+
+        qaIds.forEach(id => {
+            const mod = flatModules[id];
+            if (mod) {
+                count++;
+                const pill = document.createElement('a');
+                pill.href = mod.url;
+                pill.className = 'glass-btn';
+                pill.style.cssText = 'text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: rgba(255,255,255,0.05); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); transition: all 0.2s;';
+                pill.innerHTML = `<i class="${mod.icon}" style="color: var(--accent-color); font-size: 1.1rem;"></i> <span style="font-weight: 500;">${mod.name}</span>`;
+                pill.onmouseover = function () { this.style.transform = 'translateY(-3px)'; this.style.background = 'rgba(255,255,255,0.1)'; };
+                pill.onmouseout = function () { this.style.transform = 'translateY(0)'; this.style.background = 'rgba(255,255,255,0.05)'; };
+                grid.appendChild(pill);
+            }
+        });
+
+        section.style.display = count > 0 ? 'block' : 'none';
+    }
+
+    function openQuickAccessModal() {
+        const modal = document.getElementById('quickAccessModal');
+        const list = document.getElementById('qaList');
+
+        // Fetch latest modules
+        fetch('/api/modules')
+            .then(r => r.json())
+            .then(data => {
+                allModulesData = data;
+                list.innerHTML = '';
+
+                Object.keys(data).forEach(cat => {
+                    const catTitle = cat.charAt(0).toUpperCase() + cat.slice(1);
+                    const catDiv = document.createElement('div');
+                    catDiv.innerHTML = `<h4 style="margin: 0 0 10px 0; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">${catTitle}</h4>`;
+                    const grid = document.createElement('div');
+                    grid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 10px;';
+
+                    data[cat].forEach(mod => {
+                        const isSelected = currentQA.includes(mod.id);
+                        const item = document.createElement('div');
+                        item.className = isSelected ? 'qa-item active' : 'qa-item';
+                        item.style.cssText = `padding: 10px 15px; background: ${isSelected ? 'rgba(255, 153, 102, 0.2)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${isSelected ? '#FF9966' : 'rgba(255,255,255,0.05)'}; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s;`;
+                        item.onclick = () => toggleQuickAccessItem(mod.id, item);
+                        item.innerHTML = `
+                            <i class="${mod.icon}" style="color: ${isSelected ? '#FF9966' : 'var(--text-muted)'};"></i>
+                            <span style="font-size: 0.9rem;">${mod.name}</span>
+                            ${isSelected ? '<i class="fas fa-check" style="margin-left: auto; color: #FF9966; font-size: 0.8rem;"></i>' : ''}
+                        `;
+                        grid.appendChild(item);
+                    });
+
+                    catDiv.appendChild(grid);
+                    list.appendChild(catDiv);
+                });
+
+                updateQACount();
+
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                    modal.querySelector('.glass-panel').style.transform = 'scale(1)';
+                }, 10);
+            });
+    }
+
+    function toggleQuickAccessItem(id, itemsEl) {
+        if (currentQA.includes(id)) {
+            currentQA = currentQA.filter(x => x !== id);
+            // Visual Update
+            itemsEl.style.background = 'rgba(255,255,255,0.03)';
+            itemsEl.style.borderColor = 'rgba(255,255,255,0.05)';
+            itemsEl.querySelector('i').style.color = 'var(--text-muted)';
+            const check = itemsEl.querySelector('.fa-check');
+            if (check) check.remove();
+        } else {
+            if (currentQA.length >= 10) {
+                alert('Maximum 10 items allowed.');
+                return;
+            }
+            currentQA.push(id);
+            // Visual Update
+            itemsEl.style.background = 'rgba(255, 153, 102, 0.2)';
+            itemsEl.style.borderColor = '#FF9966';
+            itemsEl.querySelector('i:first-child').style.color = '#FF9966';
+            itemsEl.innerHTML += '<i class="fas fa-check" style="margin-left: auto; color: #FF9966; font-size: 0.8rem;"></i>';
+        }
+        updateQACount();
+    }
+
+    function updateQACount() {
+        document.getElementById('qaCount').innerText = `${currentQA.length}/10`;
+    }
+
+    function closeQuickAccessModal() {
+        const modal = document.getElementById('quickAccessModal');
+        modal.style.opacity = '0';
+        modal.querySelector('.glass-panel').style.transform = 'scale(0.9)';
+        setTimeout(() => modal.style.display = 'none', 300);
+        // Simplified reload to reset temp changes if cancelled
+        loadQuickAccess();
+    }
+
+    function saveQuickAccess() {
+        fetch('/api/user/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'quick_access': currentQA })
+        }).then(r => r.json()).then(resp => {
+            if (resp.success) {
+                renderQuickAccessSection(currentQA);
+                // Manually close without revert
+                const modal = document.getElementById('quickAccessModal');
+                modal.style.opacity = '0';
+                modal.querySelector('.glass-panel').style.transform = 'scale(0.9)';
+                setTimeout(() => modal.style.display = 'none', 300);
+            } else {
+                alert('Error saving settings');
+            }
+        });
+    }
+
+
+    function renderQuickAccessSection(qaIds) {
+        const section = document.getElementById('quickAccessSection');
+        const grid = document.getElementById('quickAccessGrid');
+
+        if (!qaIds || qaIds.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        // We need module details. If we don't have them, fetch them first.
+        if (Object.keys(allModulesData).length === 0) {
+            fetch('/api/modules')
+                .then(r => r.json())
+                .then(data => {
+                    allModulesData = data;
+                    renderQuickAccessSection(qaIds);
+                });
+            return;
+        }
+
+        grid.innerHTML = '';
+        let count = 0;
+
+        // Flatten modules for easy lookup
+        const flatModules = {};
+        Object.values(allModulesData).flat().forEach(m => flatModules[m.id] = m);
+
+        qaIds.forEach(id => {
+            const mod = flatModules[id];
+            if (mod) {
+                count++;
+                const pill = document.createElement('a');
+                pill.href = mod.url;
+                pill.className = 'glass-btn';
+                pill.style.cssText = 'text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: rgba(255,255,255,0.05); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); transition: all 0.2s;';
+                pill.innerHTML = `<i class="${mod.icon}" style="color: var(--accent-color); font-size: 1.1rem;"></i> <span style="font-weight: 500;">${mod.name}</span>`;
+                pill.onmouseover = function () { this.style.transform = 'translateY(-3px)'; this.style.background = 'rgba(255,255,255,0.1)'; };
+                pill.onmouseout = function () { this.style.transform = 'translateY(0)'; this.style.background = 'rgba(255,255,255,0.05)'; };
+                grid.appendChild(pill);
+            }
+        });
+
+        section.style.display = count > 0 ? 'block' : 'none';
+    }
+
+    function openQuickAccessModal() {
+        const modal = document.getElementById('quickAccessModal');
+        const list = document.getElementById('qaList');
+
+        // Fetch latest modules
+        fetch('/api/modules')
+            .then(r => r.json())
+            .then(data => {
+                allModulesData = data;
+                list.innerHTML = '';
+
+                Object.keys(data).forEach(cat => {
+                    const catTitle = cat.charAt(0).toUpperCase() + cat.slice(1);
+                    const catDiv = document.createElement('div');
+                    catDiv.innerHTML = `<h4 style="margin: 0 0 10px 0; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">${catTitle}</h4>`;
+                    const grid = document.createElement('div');
+                    grid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 10px;';
+
+                    data[cat].forEach(mod => {
+                        const isSelected = currentQA.includes(mod.id);
+                        const item = document.createElement('div');
+                        item.className = isSelected ? 'qa-item active' : 'qa-item';
+                        item.style.cssText = `padding: 10px 15px; background: ${isSelected ? 'rgba(255, 153, 102, 0.2)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${isSelected ? '#FF9966' : 'rgba(255,255,255,0.05)'}; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s;`;
+                        item.onclick = () => toggleQuickAccessItem(mod.id, item);
+                        item.innerHTML = `
+                            <i class="${mod.icon}" style="color: ${isSelected ? '#FF9966' : 'var(--text-muted)'};"></i>
+                            <span style="font-size: 0.9rem;">${mod.name}</span>
+                            ${isSelected ? '<i class="fas fa-check" style="margin-left: auto; color: #FF9966; font-size: 0.8rem;"></i>' : ''}
+                        `;
+                        grid.appendChild(item);
+                    });
+
+                    catDiv.appendChild(grid);
+                    list.appendChild(catDiv);
+                });
+
+                updateQACount();
+
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                    modal.querySelector('.glass-panel').style.transform = 'scale(1)';
+                }, 10);
+            });
+    }
+
+    function toggleQuickAccessItem(id, itemsEl) {
+        if (currentQA.includes(id)) {
+            currentQA = currentQA.filter(x => x !== id);
+            // Visual Update
+            itemsEl.style.background = 'rgba(255,255,255,0.03)';
+            itemsEl.style.borderColor = 'rgba(255,255,255,0.05)';
+            itemsEl.querySelector('i').style.color = 'var(--text-muted)';
+            const check = itemsEl.querySelector('.fa-check');
+            if (check) check.remove();
+        } else {
+            if (currentQA.length >= 10) {
+                alert('Maximum 10 items allowed.');
+                return;
+            }
+            currentQA.push(id);
+            // Visual Update
+            itemsEl.style.background = 'rgba(255, 153, 102, 0.2)';
+            itemsEl.style.borderColor = '#FF9966';
+            itemsEl.querySelector('i:first-child').style.color = '#FF9966';
+            itemsEl.innerHTML += '<i class="fas fa-check" style="margin-left: auto; color: #FF9966; font-size: 0.8rem;"></i>';
+        }
+        updateQACount();
+    }
+
+    function updateQACount() {
+        document.getElementById('qaCount').innerText = `${currentQA.length}/10`;
+    }
+
+    function closeQuickAccessModal() {
+        const modal = document.getElementById('quickAccessModal');
+        modal.style.opacity = '0';
+        modal.querySelector('.glass-panel').style.transform = 'scale(0.9)';
+        setTimeout(() => modal.style.display = 'none', 300);
+        // Reload to reset temp changes if cancelled? 
+        // For now we treated currentQA as live editing. If user cancels, we should re-fetch.
+        // Implementation: loadQuickAccess() on next open or page load handle it.
+        // Ideally we should keep a temp copy. Simplified: just re-render is fine.
+        loadQuickAccess();
+    }
+
+    function saveQuickAccess() {
+        fetch('/api/user/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'quick_access': currentQA })
+        }).then(r => r.json()).then(resp => {
+            if (resp.success) {
+                renderQuickAccessSection(currentQA);
+                // Manually close without revert
+                const modal = document.getElementById('quickAccessModal');
+                modal.style.opacity = '0';
+                modal.querySelector('.glass-panel').style.transform = 'scale(0.9)';
+                setTimeout(() => modal.style.display = 'none', 300);
+            } else {
+                alert('Error saving settings');
+            }
+        });
+    }
 
     function loadMiniTasks() {
         fetch(`/api/tasks?date=${new Date().toISOString().split('T')[0]}`)

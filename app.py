@@ -127,6 +127,33 @@ MODULES = {
     'produktivnost': ['Management']
 }
 
+# Detailed Module Definitions for Quick Access
+ALL_MODULES_META = {
+    'toyota': [
+        {'id': 'toyota_vessel', 'name': 'Vessel Hub', 'icon': 'fas fa-anchor', 'url': '/toyota/vessel'},
+        {'id': 'toyota_schedules', 'name': 'Ladijski razporedi', 'icon': 'fas fa-calendar-alt', 'url': '/toyota/schedules'},
+        {'id': 'toyota_damage', 'name': 'Damage Report', 'icon': 'fas fa-car-crash', 'url': '/toyota/damage-report'},
+        {'id': 'toyota_dvh', 'name': 'DVH Helper & DIZ', 'icon': 'fas fa-ship', 'url': '/toyota/dvh-pro'},
+        {'id': 'toyota_t2l', 'name': 'T2L Helper', 'icon': 'fas fa-list-alt', 'url': '/t2l/toyota'},
+        {'id': 'toyota_customs', 'name': 'Customs Helper', 'icon': 'fas fa-file-contract', 'url': '/toyota/customs'},
+        {'id': 'toyota_vagoni', 'name': 'Vagoni', 'icon': 'fas fa-train', 'url': '/toyota/vagoni'},
+    ],
+    'volkswagen': [
+        {'id': 'vw_customs', 'name': 'Customs Hub', 'icon': 'fas fa-file-contract', 'url': '/vw/carinjenje'},
+        {'id': 'vw_stock', 'name': 'Stock Report', 'icon': 'fas fa-cubes', 'url': '/vw/stock'},
+        {'id': 'vw_announce', 'name': 'Announcement', 'icon': 'fas fa-bullhorn', 'url': '/vw/announce'},
+        {'id': 'vw_verify', 'name': 'ACAR Verification', 'icon': 'fas fa-check-double', 'url': '/vw/verify'},
+        {'id': 'vw_diz', 'name': 'DIZ Splitter', 'icon': 'fas fa-project-diagram', 'url': '/vw/diz'},
+        {'id': 'vw_schedules_port', 'name': 'Vozila v Luki', 'icon': 'fas fa-ship', 'url': '/vw/schedules/port'},
+        {'id': 'vw_schedules_coll', 'name': 'Pobrano', 'icon': 'fas fa-truck-loading', 'url': '/vw/schedules/collected'},
+        {'id': 'vw_kamioni', 'name': 'Kamioni Operations', 'icon': 'fas fa-truck', 'url': '/vw/kamioni'},
+    ],
+    'others': [
+        {'id': 'daily_tasks', 'name': 'Daily Tasks', 'icon': 'fas fa-tasks', 'url': '/tasks'},
+        {'id': 'projects', 'name': 'My Projects', 'icon': 'fas fa-layer-group', 'url': '/tasks'}, # Using same URL for now or projects
+    ]
+}
+
 
 
 @app.route('/t2l/<brand>')
@@ -730,7 +757,8 @@ def user_settings():
         user = db.get_user(username)
         return jsonify({
             'dashboard_layout': user.get('dashboard_layout', []),
-            'visible_modules': user.get('visible_modules', [])
+            'visible_modules': user.get('visible_modules', []),
+            'quick_access': user.get('quick_access', [])
         })
     
     if request.method == 'POST':
@@ -740,6 +768,9 @@ def user_settings():
             updates = {}
             if 'dashboard_layout' in data:
                 updates['dashboard_layout'] = data['dashboard_layout']
+            
+            if 'quick_access' in data:
+                updates['quick_access'] = data['quick_access']
             
             if db.update_user_settings(username, updates):
                 return jsonify({'success': True})
@@ -957,6 +988,12 @@ def api_projects():
         if db.delete_project(project_id):
             return jsonify({'success': True})
         return jsonify({'error': 'Not found'}), 404
+
+
+@app.route('/api/modules', methods=['GET'])
+@login_required
+def api_all_modules():
+    return jsonify(ALL_MODULES_META)
 
 if __name__ == '__main__':
     # Print map for debugging if needed

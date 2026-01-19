@@ -22,7 +22,11 @@
             "daily_tasks_widget",
             "projects_widget"
         ],
-        "avatar_color": "#f1c40f"
+        "avatar_color": "#f1c40f",
+        "quick_access": [
+            "daily_tasks",
+            "vw_stock"
+        ]
     },
     "martin.dumanic@blg.si": {
         "password": "666666",

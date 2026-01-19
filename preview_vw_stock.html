@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+    <script>
+        // Immediately apply theme to avoid FOUC
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VW Report - BLG OPERATIVA</title>
@@ -37,7 +45,17 @@
 
                     <!-- 2. Toyota -->
                     <li class="nav-item">
-                        <a href="preview_wip.html" class="nav-link">Toyota</a>
+                        <a href="preview_wip.html" class="nav-link">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="margin-right: 6px;">
+                                <ellipse cx="12" cy="12" rx="10" ry="6"></ellipse>
+                                <path d="M2 12C2 12 5 8 12 8C19 8 22 12 22 12"></path>
+                                <path d="M12 12V8"></path>
+                                <ellipse cx="12" cy="12" rx="3" ry="6"></ellipse>
+                            </svg>
+                            Toyota
+                        </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-item"><a href="preview_t2l.html" class="dropdown-link">T2L -
                                     ATT.Lista</a></li>
@@ -47,33 +65,61 @@
                                     <li class="dropdown-item"><a href="#" class="dropdown-link">Current Situation</a>
                                     </li>
                                     <li class="dropdown-item"><a href="#" class="dropdown-link">Schedules</a></li>
+                                    <li class="dropdown-item"><a href="preview_toyota_schedules.html"
+                                            class="dropdown-link">Ladijski razporedi</a></li>
                                 </ul>
                             </li>
                         </ul>
                     </li>
 
-                    <!-- 3. Volkswagen -->
                     <li class="nav-item">
-                        <a href="preview_wip.html" class="nav-link">Volkswagen</a>
+                        <a href="preview_wip.html" class="nav-link">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="margin-right: 6px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M4.5 11.5L9 20L12 11.5L15 20L19.5 11.5"></path>
+                                <path d="M12 11.5V20"></path>
+                            </svg>
+                            Volkswagen
+                        </a>
                         <ul class="dropdown-menu">
-                            <li class="dropdown-item"><a href="preview_t2l.html" class="dropdown-link">T2L -
-                                    ATT.Lista</a></li>
+
+                            <!-- Carinjenje -->
+                            <li class="dropdown-item">
+                                <a href="#" class="dropdown-link">
+                                    <i class="fas fa-file-contract"></i> Carinjenje
+                                </a>
+                            </li>
+
+                            <!-- VW Vessel Flyout -->
                             <li class="dropdown-item has-children">
-                                <a href="#" class="dropdown-link">Ladje</a>
+                                <a href="#" class="dropdown-link">Latje (Ships)</a>
                                 <ul class="flyout-menu">
                                     <li class="dropdown-item"><a href="#" class="dropdown-link">Import</a></li>
                                     <li class="dropdown-item"><a href="#" class="dropdown-link">Schedules</a></li>
+                                    <li class="dropdown-item"><a href="preview_t2l.html" class="dropdown-link">T2L -
+                                            ATT.Lista</a></li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">DVH Helper</a></li>
                                 </ul>
                             </li>
+
+                            <!-- VW Trucks Scoop (Flyout) -->
                             <li class="dropdown-item has-children">
-                                <a href="#" class="dropdown-link">Stock</a>
+                                <a href="#" class="dropdown-link">Volkswagen Trucks</a>
                                 <ul class="flyout-menu">
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">Najava
+                                            (Announcement)</a></li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">ACAR Verification</a>
+                                    </li>
                                     <li class="dropdown-item"><a href="preview_vw_stock.html"
-                                            class="dropdown-link">Current situation (Excel)</a></li>
-                                    <li class="dropdown-item"><a href="preview_vw_stock.html"
-                                            class="dropdown-link">Reporting & Sync</a></li>
+                                            class="dropdown-link">Stock Report</a></li>
+                                    <li class="dropdown-item"><a href="#" class="dropdown-link">DIZ Splitter</a></li>
                                 </ul>
                             </li>
+
+                            <!-- Tramak (Standalone) -->
+                            <li class="dropdown-item"><a href="#" class="dropdown-link">Tramak</a></li>
                         </ul>
                     </li>
 
@@ -122,7 +168,6 @@
 
     <!-- EMBEDDED TOOL CONTENT START -->
     <!-- Tool Specific Dependencies -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -151,6 +196,7 @@
             }
         }
     </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -305,35 +351,18 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             applyLanguage();
-            // Check local tool theme preference
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                // Apply dark mode to wrapper only? Or Body?
-                // Tailwind checks class="dark" on HTML or parent. 
-                // We will add it to the wrapper as well just in case.
-                document.querySelector('.tool-wrapper').classList.add('dark');
-                document.getElementById('theme-icon').setAttribute('data-lucide', 'sun');
-            }
+            // Theme is handled by main.js (initApp -> initTheme) which sets html.dark
+            // We just ensure icons are refreshed
             lucide.createIcons();
         });
 
-        function toggleTheme() {
-            const wrapper = document.querySelector('.tool-wrapper');
-            const isDark = wrapper.classList.contains('dark');
-            if (isDark) {
-                wrapper.classList.remove('dark');
-                localStorage.theme = 'light';
-                document.getElementById('theme-icon').setAttribute('data-lucide', 'moon');
-            } else {
-                wrapper.classList.add('dark');
-                localStorage.theme = 'dark';
-                document.getElementById('theme-icon').setAttribute('data-lucide', 'sun');
-            }
-            lucide.createIcons();
-        }
-
+        // Toggle Language function
         function toggleLanguage() {
             currentLang = currentLang === 'sl' ? 'en' : 'sl';
-            document.getElementById('lang-display').textContent = currentLang.toUpperCase();
+            // Update display if element exists (it doesn't in this preview header, but logic is fine)
+            const langDisplay = document.getElementById('lang-display');
+            if (langDisplay) langDisplay.textContent = currentLang.toUpperCase();
+
             applyLanguage();
             if (processedDataForExport.length > 0) renderPreview(processedDataForExport);
         }

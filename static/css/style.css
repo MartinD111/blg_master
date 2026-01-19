@@ -259,8 +259,9 @@ header {
 
 .dropdown-link {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    gap: 12px;
     padding: 10px 16px;
     color: var(--text-muted);
     text-decoration: none;
@@ -320,7 +321,7 @@ header {
     content: '\f105';
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
-    margin-left: 10px;
+    margin-left: auto;
     font-size: 0.8rem;
     opacity: 0.7;
 }
@@ -579,7 +580,7 @@ html.dark .avatar-option {
     top: 100%;
     left: 50%;
     transform: translateX(-50%) translateY(10px);
-    background: rgba(18, 18, 18, 0.95);
+    background: var(--dropdown-bg);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
@@ -641,7 +642,7 @@ html.dark .avatar-option {
     left: 100%;
     margin-left: 8px;
     /* Gap */
-    background: rgba(18, 18, 18, 0.95);
+    background: var(--dropdown-bg);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
